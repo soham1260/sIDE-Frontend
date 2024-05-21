@@ -37,7 +37,7 @@
   transform: translate(-50%, -50%);
   height: 80px;
   width: 80px;
-  border: 6px solid rgba(0, 174, 239, 0.8); /* Blue spinner color */
+  border: 6px solid #00aeefcc; /* Blue spinner color */
   border-radius: 50%;
 }
 
