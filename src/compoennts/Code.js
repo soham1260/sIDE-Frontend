@@ -28,7 +28,7 @@ export default function Code() {
   const handleSubmit = async () => {
     setOutputLoading(true);
     try {
-      const response = await fetch("http://localhost:5000/submitcode", {
+      const response = await fetch("https://side-backend.onrender.com/submitcode", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
