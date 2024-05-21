@@ -30,6 +30,17 @@
 
 .editor-wrapper .monaco-editor, .editor-wrapper .overflow-guard { border-radius: 20px; }
 
+.spinner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  height: 80px;
+  width: 80px;
+  border: 6px solid rgba(0, 174, 239, 0.8); /* Blue spinner color */
+  border-radius: 50%;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
