@@ -23,7 +23,7 @@ export default function Code() {
 
   const handleSubmit = async () => {
     try {
-      const response = await fetch("http://localhost:5000/submitcode", {
+      const response = await fetch(process.env.REACT_APP_BACKEND_URL+"/submitcode", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -110,16 +110,16 @@ export default function Code() {
       <div className="row">
         <div className='d-flex col-md-8' style={{justifyContent: "space-between"}}>
           <div className='d-flex align-items-center'>
-            <button type="button" class="btn btn-outline-primary btn-sm" style={{borderRadius: "0"}} onClick={handleSubmit}>Submit</button>
-            <div class="dropdown" data-bs-theme="dark">
-              <button class="btn btn-outline-primary btn-sm dropdown-toggle" id="dropdownMenuButtonDark" style={{borderRadius: "0",width:"100px"}} type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <button type="button" className="btn btn-outline-primary btn-sm" style={{borderRadius: "0"}} onClick={handleSubmit}>Submit</button>
+            <div className="dropdown" data-bs-theme="dark">
+              <button className="btn btn-outline-primary btn-sm dropdown-toggle" id="dropdownMenuButtonDark" style={{borderRadius: "0",width:"100px"}} type="button" data-bs-toggle="dropdown" aria-expanded="false">
                 {language==="cpp" ? "c++" : language}
               </button>
-              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonDark">
-                <li><a class="dropdown-item" onClick={() => {setLanguage("c");setCode(demoprograms["c"]);setAns("");}}>c</a></li>
-                <li><a class="dropdown-item" onClick={() => {setLanguage("cpp");setCode(demoprograms["cpp"]);setAns("");}}>c++</a></li>
-                <li><a class="dropdown-item" onClick={() => {setLanguage("java");setCode(demoprograms["java"]);setAns("");setFileName("main");}}>Java</a></li>
-                <li><a class="dropdown-item" onClick={() => {setLanguage("python");setCode(demoprograms["python"]);setAns("");}}>Python</a></li>
+              <ul className="dropdown-menu" aria-labelledby="dropdownMenuButtonDark">
+                <li><a className="dropdown-item" onClick={() => {setLanguage("c");setCode(demoprograms["c"]);setAns("");}}>c</a></li>
+                <li><a className="dropdown-item" onClick={() => {setLanguage("cpp");setCode(demoprograms["cpp"]);setAns("");}}>c++</a></li>
+                <li><a className="dropdown-item" onClick={() => {setLanguage("java");setCode(demoprograms["java"]);setAns("");setFileName("main");}}>Java</a></li>
+                <li><a className="dropdown-item" onClick={() => {setLanguage("python");setCode(demoprograms["python"]);setAns("");}}>Python</a></li>
               </ul>
             </div>
             {
@@ -186,7 +186,7 @@ export default function Code() {
                     <img className='ico' src={download} style={{width: "15px",marginLeft: "30%"}} onClick={handleOutputDownload}/>
                   </div>
                 </div>
-                <textarea className='px-4' type="text" value={ans} style={{ width: '100%', height: '78%', border: '0', maxHeight:"100%",padding:"0",outline: "none",backgroundColor: "#2c2c2c",resize:"none",colorScheme:"dark"}} />
+                <textarea className='px-4' type="text" value={ans} readOnly style={{ width: '100%', height: '78%', border: '0', maxHeight:"100%",padding:"0",outline: "none",backgroundColor: "#2c2c2c",resize:"none",colorScheme:"dark"}} />
               </div>
             </div>
           </div>
