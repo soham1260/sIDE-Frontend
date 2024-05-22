@@ -7,6 +7,7 @@ import mongo from '../assets/mongo.png';
 import express from '../assets/express.png';
 import docker from '../assets/docker.png';
 import react from '../assets/react.png';
+import azure from '../assets/azure.png';
 
 export default function About() {
   return (
@@ -70,6 +71,13 @@ export default function About() {
         <div style={{height: "120px", display: "flex", alignItems: "center", color: "white" }}>
           <div class="col-md-2"><img src={docker} alt="html" width="120px"/></div>
           <div class="col-md-10">Docker is an open-source containerization platform by which you can pack your application and all its dependencies into a standardized unit called a container. Containers are light in weight which makes them portable and they are isolated from the underlying infrastructure and from each other container.</div>
+        </div>
+
+        <hr style={{ width: "100%", height: "2px", backgroundColor: "#00aeefcc", margin: "0px" , border: "0px" }} />
+
+        <div style={{height: "120px", display: "flex", alignItems: "center", color: "white" }}>
+          <div class="col-md-10">Microsoft Azure, often referred to as Azure, is a cloud computing platform developed by Microsoft. It offers access, management, and the development of applications and services through global data centers. For this project, Azure Virtual Machines were used to host docker containers.</div>
+          <div class="col-md-2"><img src={azure} alt="html" width="120px"/></div>
         </div>
 
       </div>

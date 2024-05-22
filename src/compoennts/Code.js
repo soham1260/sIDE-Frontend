@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState,useEffect,useContext } from 'react';
 import Editor from '@monaco-editor/react';
 import copy from '../assets/copy.svg'
 import upload from '../assets/upload.svg'
@@ -7,6 +7,7 @@ import reset from '../assets/reset.svg'
 import cloud from '../assets/cloud.svg'
 import spinner from '../assets/spinner.gif'
 import demoprograms from '../data/demoprograms';
+import { state } from './state/State'
 
 export default function Code() {
   const [code, setCode] = useState("");
@@ -16,11 +17,17 @@ export default function Code() {
   const [filename, setFileName] = useState("")
   const [loading,setLoading] = useState(true);
   const [outputloading,setOutputLoading] = useState(false)
+  
+  const context = useContext(state);
+  const { isLoggedIn,setIsLoggedIn } = context;
 
   useEffect(() => {
     setLanguage("c");
     setCode(demoprograms["c"]);
     setFileName("main");
+    if (localStorage.getItem("sIDE+AuthToken")){
+      setIsLoggedIn(true);
+    }
     setLoading(false)
   }, [])
   
@@ -110,6 +117,73 @@ export default function Code() {
     URL.revokeObjectURL(url);
   };
 
+  const checkFile = async () => {
+
+    try {
+      const response = await fetch("https://side-backend.onrender.com/checkfileexists", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+          'sIDE+AuthToken': localStorage.getItem('sIDE+AuthToken')
+        },
+        body: JSON.stringify({ language, filename })
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.message || "Error connecting to server");
+      }
+  
+      return data;
+    } catch (error) {
+      throw new Error(error.message || "Error connecting to server");
+    }
+  }
+  
+  const saveFile = async() => {
+    try {
+      const response = await fetch("https://side-backend.onrender.com/savefile", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+          'sIDE+AuthToken': localStorage.getItem('sIDE+AuthToken')
+        },
+        body: JSON.stringify({ language, filename, code })
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.message || "Error connecting to server");
+      }
+  
+      return data;
+    } catch (error) {
+      throw new Error(error.message || "Error connecting to server");
+    }
+  }
+
+  const handleCloudSave = async () => {
+    if(isLoggedIn)
+      {
+        try {
+          const response = await checkFile()
+          if(response.exists) {
+            const confirmUpdate = window.confirm(`File ${filename}.${language} already exists. Do you want to update it?`);
+            if (confirmUpdate) {
+              await saveFile();
+            }
+          }
+          else {
+            await saveFile();
+          }
+        } catch (error) {
+          alert("Error connecting server, please try again");
+        }
+      }
+  }
+
   return (
     <div style={{paddingTop: "1%"}}>
       {loading ? <div className='spinner' style={{display: "flex", justifyContent:"center"}}><img src={spinner}/></div> :
@@ -145,7 +219,7 @@ export default function Code() {
           </div>
           <div className='col-md-4'>
             <input type="text" placeholder='save code' style={{border: "none", borderBottom: "1px solid white",backgroundColor: "#2c2c2c", outline: "none",color:"white",width:"80%",fontSize: "large"}} value={filename} onChange={(e) => {setFileName(e.target.value)}}/>
-            <img className="ico" style={{marginLeft: "20px"}} src={cloud} width={"30px"}/>
+            <img className="ico" style={{marginLeft: "20px",...(isLoggedIn ? {} : { opacity: "0.6" })}} src={cloud} width={"30px"} onClick={handleCloudSave}/>
           </div>
         </div>
         <div className="row" style={{height: "80vh"}}>
