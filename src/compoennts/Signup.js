@@ -1,12 +1,16 @@
-import React,{useState} from 'react'
+import React,{useState,useContext} from 'react'
 import {Link,useNavigate} from 'react-router-dom'
 import './Login.css'
+import { state } from './state/State'
 
 export default function Signup() {
 
     const [Credentials, setCredentials] = useState({name : "", email : "", password : ""});
 	  const [Error, setError] = useState({ errors: [] });
 	  let navigate = useNavigate();
+
+    const context = useContext(state);
+    const { setIsLoggedIn } = context;
 
 		const handleSubmit = async (e) => {
 			e.preventDefault();
@@ -17,7 +21,8 @@ export default function Signup() {
 
 			if(json.success)
 			{
-				localStorage.setItem('sIDE+AuthToken', json["sIDE+AuthToken"]);
+				localStorage.setItem('token', json.authtoken);
+        setIsLoggedIn(true);
 				navigate('/');
 			}
 			else

@@ -1,11 +1,16 @@
-import React,{useState} from 'react'
+import React,{useState,useContext} from 'react'
 import {Link,useNavigate} from 'react-router-dom'
 import './Login.css'
+import { state } from './state/State'
+
 export default function Login() {
 
   const [Credentials, setCredentials] = useState({email : "",password : ""});
   const [Error, setError] = useState(false);
   let navigate = useNavigate();
+
+  const context = useContext(state);
+  const { setIsLoggedIn } = context;
 
   const handleSubmit = async(e) => {
       e.preventDefault();
@@ -16,7 +21,8 @@ export default function Login() {
 
       if(json.success)
       {
-        localStorage.setItem('sIDE+AuthToken', json["sIDE+AuthToken"]);
+        localStorage.setItem('token', json.authtoken);
+        setIsLoggedIn(true);
         navigate('/');
       }
       else
@@ -42,7 +48,7 @@ export default function Login() {
             <label id='loginLabel' htmlFor="username" style={{marginTop:"10px"}}>Email</label>
             <input type="text" placeholder="Email" id="loginInput" name='email' onChange={onChange}/>
 
-            <label id='loginLabel' htmlFor="password">Password</label>
+            <label id='loginLabel' htmlFor="password" style={{marginTop:"10px"}}>Password</label>
             <input type="password" placeholder="Password" id="loginInput" name='password' onChange={onChange}/>
             {
               Error && <div style={{height:"10%",display:"flex", alignItems:"center",marginTop:"2%"}}><p className="error-message" style={{margin:"0"}}>Invalid Email or Password</p></div>
@@ -54,6 +60,9 @@ export default function Login() {
             <div className="fb"><i className="fab fa-facebook"></i>  Facebook</div>
             </div> */}
             <div style={{display:"flex",justifyContent:"center",marginTop:"8%",fontSize:"large"}}>
+              <Link to="/signup" style={{textDecoration:"none"}}>New Coders, Signup</Link>
+            </div>
+            <div style={{display:"flex",justifyContent:"center",marginTop:"5%",fontSize:"large"}}>
               <Link to="/" style={{textDecoration:"none"}}>Continue as Guest</Link>
             </div>
             <div>

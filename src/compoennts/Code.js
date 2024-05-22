@@ -25,7 +25,7 @@ export default function Code() {
     setLanguage("c");
     setCode(demoprograms["c"]);
     setFileName("main");
-    if (localStorage.getItem("sIDE+AuthToken")){
+    if (localStorage.getItem("token")){
       setIsLoggedIn(true);
     }
     setLoading(false)
@@ -124,7 +124,7 @@ export default function Code() {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
-          'sIDE+AuthToken': localStorage.getItem('sIDE+AuthToken')
+          'auth-token': localStorage.getItem('token')
         },
         body: JSON.stringify({ language, filename })
       });
@@ -147,7 +147,7 @@ export default function Code() {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
-          'sIDE+AuthToken': localStorage.getItem('sIDE+AuthToken')
+          'auth-token': localStorage.getItem('token')
         },
         body: JSON.stringify({ language, filename, code })
       });
