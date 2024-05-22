@@ -17,7 +17,7 @@ export default function Signup() {
 
 			if(json.success)
 			{
-				localStorage.setItem('token',json.authtoken);
+				localStorage.setItem('sIDE+AuthToken', json["sIDE+AuthToken"]);
 				navigate('/');
 			}
 			else

@@ -16,7 +16,7 @@ export default function Login() {
 
       if(json.success)
       {
-        localStorage.setItem('sIDE+AuthToken',json.authtoken);
+        localStorage.setItem('sIDE+AuthToken', json["sIDE+AuthToken"]);
         navigate('/');
       }
       else
