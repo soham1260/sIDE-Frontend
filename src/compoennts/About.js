@@ -11,7 +11,7 @@ import azure from '../assets/azure.png';
 
 export default function About() {
   return (
-    <div className='container' style={{ paddingTop: "1%", paddingBottom: "5%" }}>
+    <div className='container' style={{ paddingTop: "1%"}}>
       <h1 style={{color: "white"}}>About</h1>
       <p style={{paddingTop: "0px", margin: "0px", color: "white"}}>From a coder, for a coder. Hi, I am Soham, the creator of this awesome website.</p>
       <p style={{paddingTop: "10px", margin: "0px", color: "white"}}>Here's the source code!</p>

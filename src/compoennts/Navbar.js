@@ -9,7 +9,7 @@ export default function Navbar() {
   
   const { isLoggedIn,setIsLoggedIn } = context;
   useEffect(() => {
-    if (localStorage.getItem("toekn")){
+    if (localStorage.getItem("token")){
       setIsLoggedIn(true);
     }
   }, [])
@@ -17,6 +17,9 @@ export default function Navbar() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     setIsLoggedIn(false);
+    if (location.pathname === '/mycodes') {
+      navigate('/code');
+    }
   }
 
   const handleLogin = () => {

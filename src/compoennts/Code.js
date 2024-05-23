@@ -8,6 +8,7 @@ import cloud from '../assets/cloud.svg'
 import spinner from '../assets/spinner.gif'
 import demoprograms from '../data/demoprograms';
 import { state } from './state/State'
+import {useParams, useNavigate} from 'react-router-dom'
 
 export default function Code() {
   const [code, setCode] = useState("");
@@ -21,17 +22,57 @@ export default function Code() {
   
   const context = useContext(state);
   const { isLoggedIn,setIsLoggedIn } = context;
+  const navigate = useNavigate();
+  const { id } = useParams();
 
   useEffect(() => {
-    setLanguage("c");
-    setCode(demoprograms["c"]);
-    setFileName("main");
-    if (localStorage.getItem("token")){
-      setIsLoggedIn(true);
-    }
-    setLoading(false)
-  }, [])
+    const loadContent = async () => {
+      if(id) {
+        await fetchCode(id);
+      }
+      else {
+        setLanguage("c");
+        setCode(demoprograms["c"]);
+        setFileName("main");
+      }
   
+      if (localStorage.getItem("token")){
+        setIsLoggedIn(true);
+      }
+    }
+
+    loadContent();
+    setLoading(false)
+  }, [id])
+  
+  const fetchCode = async (id) => {
+    console.log("asd");
+    try {
+      const response = await fetch(`http://localhost:5000/fetchcode?id=${id}`, {
+        method: "GET",
+        headers: {
+          'Content-Type': 'application/json',
+          'auth-token': localStorage.getItem('token')
+        },
+      });
+      
+      const data = await response.json();
+      if(!response.ok){
+        throw new Error("Error connecting server");
+      }
+      if(data.message){
+        navigate("/notfound")
+      }
+      setLanguage(data.language);
+      setCode(data.code);
+      setFileName(data.filename);
+    } catch (error) {
+      alert("Error connecting server, please try again");
+      setLanguage("c");
+      setCode(demoprograms["c"]);
+      setFileName("main");
+    }
+  }
 
   const handleSubmit = async () => {
     setOutputLoading(true);
