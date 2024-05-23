@@ -12,11 +12,12 @@ import { state } from './state/State'
 export default function Code() {
   const [code, setCode] = useState("");
   const [ans, setAns] = useState("");
-  const [input, setInput] = useState("")
-  const [language, setLanguage] = useState("c")
-  const [filename, setFileName] = useState("")
+  const [input, setInput] = useState("");
+  const [language, setLanguage] = useState("c");
+  const [filename, setFileName] = useState("");
   const [loading,setLoading] = useState(true);
-  const [outputloading,setOutputLoading] = useState(false)
+  const [outputloading,setOutputLoading] = useState(false);
+  const [saving,setSaving] = useState(false);
   
   const context = useContext(state);
   const { isLoggedIn,setIsLoggedIn } = context;
@@ -35,7 +36,7 @@ export default function Code() {
   const handleSubmit = async () => {
     setOutputLoading(true);
     try {
-      const response = await fetch("https://side-backend.onrender.com/submitcode", {
+      const response = await fetch("http://localhost:5000/submitcode", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -120,7 +121,7 @@ export default function Code() {
   const checkFile = async () => {
 
     try {
-      const response = await fetch("https://side-backend.onrender.com/checkfileexists", {
+      const response = await fetch("http://localhost:5000/checkfileexists", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -143,7 +144,7 @@ export default function Code() {
   
   const saveFile = async() => {
     try {
-      const response = await fetch("https://side-backend.onrender.com/savefile", {
+      const response = await fetch("http://localhost:5000/savefile", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -165,6 +166,7 @@ export default function Code() {
   }
 
   const handleCloudSave = async () => {
+    setSaving(true);
     if(isLoggedIn)
       {
         try {
@@ -182,6 +184,7 @@ export default function Code() {
           alert("Error connecting server, please try again");
         }
       }
+      setSaving(false);
   }
 
   return (
@@ -219,7 +222,7 @@ export default function Code() {
           </div>
           <div className='col-md-4'>
             <input type="text" placeholder='save code' style={{border: "none", borderBottom: "1px solid white",backgroundColor: "#2c2c2c", outline: "none",color:"white",width:"80%",fontSize: "large"}} value={filename} onChange={(e) => {setFileName(e.target.value)}}/>
-            <img className="ico" style={{marginLeft: "20px",...(isLoggedIn ? {} : { opacity: "0.6" })}} src={cloud} width={"30px"} onClick={handleCloudSave}/>
+            {saving ? <img src={spinner} style={{marginLeft:"20px",width:"27px"}}/> : <img className="ico" style={{marginLeft: "20px",...(isLoggedIn ? {} : { opacity: "0.6" })}} src={cloud} width={"30px"} onClick={handleCloudSave}/>}
           </div>
         </div>
         <div className="row" style={{height: "80vh"}}>

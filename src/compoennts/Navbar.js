@@ -9,14 +9,13 @@ export default function Navbar() {
   
   const { isLoggedIn,setIsLoggedIn } = context;
   useEffect(() => {
-    console.log(location.pathname);
-    if (localStorage.getItem("sIDE+AuthToken")){
+    if (localStorage.getItem("toekn")){
       setIsLoggedIn(true);
     }
   }, [])
   
   const handleLogout = () => {
-    localStorage.removeItem('sIDE+AuthToken');
+    localStorage.removeItem('token');
     setIsLoggedIn(false);
   }
 
@@ -46,7 +45,7 @@ export default function Navbar() {
                 <Link className="nav-link active" aria-current="page" to="/code">Code</Link>
               </li>
               <li className="nav-item">
-                <Link className={`nav-link ${!isLoggedIn && "disabled"}`} aria-disabled={!isLoggedIn}  to="/">My codes</Link>
+                <Link className={`nav-link ${!isLoggedIn && "disabled"}`} aria-disabled={!isLoggedIn}  to="/mycodes">My codes</Link>
               </li>
               <li className="nav-item">
                 <Link className="nav-link" to="/about">About</Link>

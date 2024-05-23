@@ -7,6 +7,7 @@ import About from './compoennts/About'
 import Login from './compoennts/Login';
 import Signup from './compoennts/Signup';
 import Code from './compoennts/Code';
+import Mycodes from './compoennts/Mycodes';
 import State from './compoennts/state/State';
 
 function App() {
@@ -15,7 +16,7 @@ function App() {
       <State>
         <Routes>
           <Route path='/' element={<Home/>}/>
-          <Route path='/mycodes' element={<Home/>}/>
+          <Route path='/mycodes' element={<><Navbar/><Mycodes/></>}/>
           <Route path='/code' element={<><Navbar/><Code/></>}/>
           <Route path='/about' element={<><Navbar/><About/></>}/>
           <Route path='/login' element={<><Login/></>}/>
