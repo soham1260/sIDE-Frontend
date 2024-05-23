@@ -48,7 +48,7 @@ export default function Code() {
   const fetchCode = async (id) => {
     console.log("asd");
     try {
-      const response = await fetch(`http://localhost:5000/fetchcode?id=${id}`, {
+      const response = await fetch(`https://side-backend.onrender.com/fetchcode?id=${id}`, {
         method: "GET",
         headers: {
           'Content-Type': 'application/json',
@@ -77,7 +77,7 @@ export default function Code() {
   const handleSubmit = async () => {
     setOutputLoading(true);
     try {
-      const response = await fetch("http://localhost:5000/submitcode", {
+      const response = await fetch("https://side-backend.onrender.com/submitcode", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -162,7 +162,7 @@ export default function Code() {
   const checkFile = async () => {
 
     try {
-      const response = await fetch("http://localhost:5000/checkfileexists", {
+      const response = await fetch("https://side-backend.onrender.com/checkfileexists", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -185,7 +185,7 @@ export default function Code() {
   
   const saveFile = async() => {
     try {
-      const response = await fetch("http://localhost:5000/savefile", {
+      const response = await fetch("https://side-backend.onrender.com/savefile", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
