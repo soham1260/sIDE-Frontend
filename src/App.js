@@ -9,6 +9,7 @@ import Signup from './compoennts/Signup';
 import Code from './compoennts/Code';
 import Mycodes from './compoennts/Mycodes';
 import State from './compoennts/state/State';
+import Notfound from './compoennts/Notfound';
 
 function App() {
   return (
@@ -19,10 +20,11 @@ function App() {
           <Route path='/mycodes' element={<><Navbar/><Mycodes/></>}/>
           <Route path='/code' element={<><Navbar/><Code/></>}/>
           <Route path='/code/:id' element={<><Navbar/><Code/></>}/>
-          <Route path='/notfound' element={<Home/>}/>
+          <Route path='/notfound' element={<><Navbar/><Notfound/></>}/>
           <Route path='/about' element={<><Navbar/><About/></>}/>
           <Route path='/login' element={<><Login/></>}/>
           <Route path='/signup' element={<><Signup/></>}/>
+          <Route path='*' element={<><Navbar/><Notfound/></>}/>
         </Routes>
       </State>
     </Router>

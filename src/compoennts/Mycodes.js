@@ -6,7 +6,7 @@ export default function Mycodes() {
   const [loading,setLoading] = useState(true);
   const navigate = useNavigate();
   
-  const [data,setData] = useState({})
+  const [data,setData] = useState()
 
   const fetchUserData = async () => {
     try {
@@ -100,7 +100,7 @@ export default function Mycodes() {
         <div className='container'>
             <h1 style={{color: "white", paddingTop: "2%"}}>My Codes</h1>
             {
-                data.codes.map((code) => {
+                data && data.codes.map((code) => {
                     return (
                         <div className='row' key={code._id} style={{color: "white",margin:"0",marginTop:"0", height:"12vh"}}>
                             <div className='col-md-8' style={{display: "flex", flexDirection: "row", alignItems:"center", height: "100%"}}>

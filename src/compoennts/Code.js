@@ -122,6 +122,22 @@ export default function Code() {
     event.target.value=null;
   };
 
+  const handleCodeUpload = (event) => {
+    const confirmUpdate = window.confirm(`The code will get overwritten. Please copy or download the code. Click OK to proceed.`);
+    if(confirmUpdate){
+      const selectedFile = event.target.files[0];
+      if (selectedFile) {
+        const reader = new FileReader();
+        reader.readAsText(selectedFile);
+        reader.onload = (e) => {
+          const content = e.target.result;
+          setCode(content);
+        };
+      }
+      event.target.value=null;
+    }
+  };
+
   const handleCodeDownload = () => {
     const blob = new Blob([code], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -228,6 +244,16 @@ export default function Code() {
       setSaving(false);
   }
 
+  function handleLanguageChange(language) {
+    const confirmUpdate = window.confirm(`The code will get erased. Please copy or download the code. Click OK to proceed.`);
+    if (confirmUpdate) {
+      setLanguage(language);
+      setCode(demoprograms[language]);
+      setAns("");
+      setFileName("main");
+    }
+  }
+
   return (
     <div style={{paddingTop: "1%"}}>
       {loading ? <div className='spinner' style={{display: "flex", justifyContent:"center"}}><img src={spinner}/></div> :
@@ -241,10 +267,10 @@ export default function Code() {
                   {language==="cpp" ? "c++" : language}
                 </button>
                 <ul className="dropdown-menu" aria-labelledby="dropdownMenuButtonDark">
-                  <li><a className="dropdown-item" onClick={() => {setLanguage("c");setCode(demoprograms["c"]);setAns("");}}>c</a></li>
-                  <li><a className="dropdown-item" onClick={() => {setLanguage("cpp");setCode(demoprograms["cpp"]);setAns("");}}>c++</a></li>
-                  <li><a className="dropdown-item" onClick={() => {setLanguage("java");setCode(demoprograms["java"]);setAns("");setFileName("main");}}>Java</a></li>
-                  <li><a className="dropdown-item" onClick={() => {setLanguage("python");setCode(demoprograms["python"]);setAns("");}}>Python</a></li>
+                  <li><a className="dropdown-item" onClick={() => {handleLanguageChange("c")}}>c</a></li>
+                  <li><a className="dropdown-item" onClick={() => {handleLanguageChange("cpp")}}>c++</a></li>
+                  <li><a className="dropdown-item" onClick={() => {handleLanguageChange("java");}}>Java</a></li>
+                  <li><a className="dropdown-item" onClick={() => {handleLanguageChange("python")}}>Python</a></li>
                 </ul>
               </div>
               {
@@ -256,14 +282,15 @@ export default function Code() {
             </div>
             
             <div>
-              <img className="ico" style={{marginRight: "20px"}} src={reset} width={"20px"} onClick={() => {setCode(demoprograms[language])}}/>
-              <img className="ico" style={{marginRight: "20px"}} src={copy} width={"20px"} onClick={() => {navigator.clipboard.writeText(code)}}/>
-              <img className="ico" style={{marginRight: "40px"}} src={download} width={"23px"} onClick={handleCodeDownload}/>
+              <img className="ico" style={{marginRight: "15px"}} src={reset} width={"20px"} onClick={() => {handleLanguageChange(language)}}/>
+              <img className="ico" style={{marginRight: "15px"}} src={copy} width={"20px"} onClick={() => {navigator.clipboard.writeText(code)}}/>
+              <img className="ico" style={{marginRight: "15px"}} src={download} width={"23px"} onClick={handleCodeDownload}/>
+              <img className="ico" style={{marginRight: "40px"}} src={upload} width={"23px"} onClick={() => {document.getElementById('codeInput').click();}}/>
             </div>
           </div>
           <div className='col-md-4'>
             <input type="text" placeholder='save code' style={{border: "none", borderBottom: "1px solid white",backgroundColor: "#2c2c2c", outline: "none",color:"white",width:"80%",fontSize: "large"}} value={filename} onChange={(e) => {setFileName(e.target.value)}}/>
-            {saving ? <img src={spinner} style={{marginLeft:"20px",width:"27px"}}/> : <img className="ico" style={{marginLeft: "20px",...(isLoggedIn ? {} : { opacity: "0.6" })}} src={cloud} width={"30px"} onClick={handleCloudSave}/>}
+            {saving ? <img src={spinner} style={{marginLeft:"20px",width:"27px"}}/> : <img className="ico" style={{marginLeft: "20px",...(isLoggedIn ? {} : { opacity: "0.6" })}} src={cloud} width={"28px"} onClick={handleCloudSave}/>}
           </div>
         </div>
         <div className="row" style={{height: "80vh"}}>
@@ -317,6 +344,7 @@ export default function Code() {
             </div>
         </div>
         <input type="file" id="fileInput" style={{ display: 'none' }} accept=".txt" onChange={handleInputUpload} />
+        <input type="file" id="codeInput" style={{ display: 'none' }} accept={language === "python" ? ".py" : "." + language} onChange={handleCodeUpload} />
       </div>}
     </div>
   );
