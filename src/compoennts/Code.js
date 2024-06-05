@@ -46,9 +46,8 @@ export default function Code() {
   }, [id])
   
   const fetchCode = async (id) => {
-    console.log("asd");
     try {
-      const response = await fetch(`https://side-backend.onrender.com/fetchcode?id=${id}`, {
+      const response = await fetch(`http://localhost:5000/fetchcode?id=${id}`, {
         method: "GET",
         headers: {
           'Content-Type': 'application/json',
@@ -77,7 +76,7 @@ export default function Code() {
   const handleSubmit = async () => {
     setOutputLoading(true);
     try {
-      const response = await fetch("https://side-backend.onrender.com/submitcode", {
+      const response = await fetch("http://localhost:5000/submitcode", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -156,6 +155,9 @@ export default function Code() {
       case "java":
         ext=".java"
         break;
+      case "javascript":
+        ext=".js"
+        break;
       default:
         ext=".txt"
     }
@@ -178,7 +180,7 @@ export default function Code() {
   const checkFile = async () => {
 
     try {
-      const response = await fetch("https://side-backend.onrender.com/checkfileexists", {
+      const response = await fetch("http://localhost:5000/checkfileexists", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -201,7 +203,7 @@ export default function Code() {
   
   const saveFile = async() => {
     try {
-      const response = await fetch("https://side-backend.onrender.com/savefile", {
+      const response = await fetch("http://localhost:5000/savefile", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -271,6 +273,7 @@ export default function Code() {
                   <li><a className="dropdown-item" onClick={() => {handleLanguageChange("cpp")}}>c++</a></li>
                   <li><a className="dropdown-item" onClick={() => {handleLanguageChange("java");}}>Java</a></li>
                   <li><a className="dropdown-item" onClick={() => {handleLanguageChange("python")}}>Python</a></li>
+                  <li><a className="dropdown-item" onClick={() => {handleLanguageChange("javascript")}}>Javascript</a></li>
                 </ul>
               </div>
               {
@@ -344,7 +347,7 @@ export default function Code() {
             </div>
         </div>
         <input type="file" id="fileInput" style={{ display: 'none' }} accept=".txt" onChange={handleInputUpload} />
-        <input type="file" id="codeInput" style={{ display: 'none' }} accept={language === "python" ? ".py" : "." + language} onChange={handleCodeUpload} />
+        <input type="file" id="codeInput" style={{ display: 'none' }} accept={language === "python" ? ".py" : (language === "javascript" ? ".js" : "." + language)} onChange={handleCodeUpload} />
       </div>}
     </div>
   );

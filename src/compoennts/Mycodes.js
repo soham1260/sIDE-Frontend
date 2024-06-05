@@ -10,7 +10,7 @@ export default function Mycodes() {
 
   const fetchUserData = async () => {
     try {
-      const response = await fetch("https://side-backend.onrender.com/fetchuserdata", {
+      const response = await fetch("http://localhost:5000/fetchuserdata", {
         method: "GET",
         headers: {
           'Content-Type': 'application/json',
@@ -47,7 +47,7 @@ export default function Mycodes() {
 
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(`https://side-backend.onrender.com/deletecode?id=${id}`, {
+      const response = await fetch(`http://localhost:5000/deletecode?id=${id}`, {
         method: "GET",
         headers: {
           'Content-Type': 'application/json',
@@ -84,6 +84,9 @@ export default function Mycodes() {
         case "java":
           ext=".java"
           break;
+          case "javascript":
+          ext=".js"
+          break;
         default:
           ext=".txt"
       }
@@ -104,7 +107,7 @@ export default function Mycodes() {
                     return (
                         <div className='row' key={code._id} style={{color: "white",margin:"0",marginTop:"0", height:"12vh"}}>
                             <div className='col-md-8' style={{display: "flex", flexDirection: "row", alignItems:"center", height: "100%"}}>
-                                <h5 style={{margin:"0"}}>{code.filename}.{code.language}</h5>
+                                <h5 style={{margin:"0"}}>{code.filename}.{code.language === "python" ? "py" : (code.language === "javascript" ? "js" : code.language)}</h5>
                             </div>
                             <div className='col-md-4' style={{display: "flex", flexDirection: "row", justifyContent: "space-evenly",alignItems:"center", height: "100%"}}>
                                 <button type="button" class="btn btn-outline-light" style={{width:"100px"}} onClick={() => {handleDownload(code.code,code.filename,code.language)}}>Download</button>
