@@ -30,6 +30,12 @@ export default function Code() {
       if(id) {
         await fetchCode(id);
       }
+      else if(localStorage.getItem("c") && localStorage.getItem("c").length !== 0)
+      {
+        setLanguage("c");
+        setCode(localStorage.getItem("c"));
+        setFileName("main");
+      }
       else {
         setLanguage("c");
         setCode(demoprograms["c"]);
@@ -47,7 +53,7 @@ export default function Code() {
   
   const fetchCode = async (id) => {
     try {
-      const response = await fetch(`http://localhost:5000/fetchcode?id=${id}`, {
+      const response = await fetch(`https://side-backend.onrender.com/fetchcode?id=${id}`, {
         method: "GET",
         headers: {
           'Content-Type': 'application/json',
@@ -76,7 +82,7 @@ export default function Code() {
   const handleSubmit = async () => {
     setOutputLoading(true);
     try {
-      const response = await fetch("http://localhost:5000/submitcode", {
+      const response = await fetch("https://side-backend.onrender.com/submitcode", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -100,6 +106,7 @@ export default function Code() {
   
   const handleEditorChange = (value, event) => {
     setCode(value);
+    localStorage.setItem(language, value);
   };
 
 
@@ -180,7 +187,7 @@ export default function Code() {
   const checkFile = async () => {
 
     try {
-      const response = await fetch("http://localhost:5000/checkfileexists", {
+      const response = await fetch("https://side-backend.onrender.com/checkfileexists", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -203,7 +210,7 @@ export default function Code() {
   
   const saveFile = async() => {
     try {
-      const response = await fetch("http://localhost:5000/savefile", {
+      const response = await fetch("https://side-backend.onrender.com/savefile", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -247,13 +254,17 @@ export default function Code() {
   }
 
   function handleLanguageChange(language) {
-    const confirmUpdate = window.confirm(`The code will get erased. Please copy or download the code. Click OK to proceed.`);
-    if (confirmUpdate) {
+    
       setLanguage(language);
-      setCode(demoprograms[language]);
+      if(localStorage.getItem(language) && localStorage.getItem(language).length!=0){
+        setCode(localStorage.getItem(language));
+      }
+      else{
+        setCode(demoprograms[language])
+      }
       setAns("");
       setFileName("main");
-    }
+    
   }
 
   return (
@@ -285,7 +296,7 @@ export default function Code() {
             </div>
             
             <div>
-              <img className="ico" style={{marginRight: "15px"}} src={reset} width={"20px"} onClick={() => {handleLanguageChange(language)}}/>
+              <img className="ico" style={{marginRight: "15px"}} src={reset} width={"20px"} onClick={() => {localStorage.setItem(language, "");handleLanguageChange(language)}}/>
               <img className="ico" style={{marginRight: "15px"}} src={copy} width={"20px"} onClick={() => {navigator.clipboard.writeText(code)}}/>
               <img className="ico" style={{marginRight: "15px"}} src={download} width={"23px"} onClick={handleCodeDownload}/>
               <img className="ico" style={{marginRight: "40px"}} src={upload} width={"23px"} onClick={() => {document.getElementById('codeInput').click();}}/>

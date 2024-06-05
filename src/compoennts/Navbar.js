@@ -15,23 +15,18 @@ export default function Navbar() {
   }, [])
   
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    setIsLoggedIn(false);
-    if (location.pathname === '/mycodes') {
-      navigate('/code');
+    const confirmUpdate = window.confirm(`Auto save session will be cleared. Please save or download the code. Click OK to proceed Login.`);
+    if (confirmUpdate) {
+      localStorage.clear();
+      setIsLoggedIn(false);
+      if (location.pathname === '/mycodes') {
+        navigate('/code');
+      }
     }
   }
 
   const handleLogin = () => {
-    if (location.pathname === '/code') {
-      const confirmUpdate = window.confirm(`The code will get erased. Please copy or download the code. Click OK to proceed Login.`);
-      if (confirmUpdate) {
-        navigate("/login")
-      }
-    }
-    else{
-      navigate("/login")
-    }
+    navigate("/login");
   }
   
   return (
