@@ -25,6 +25,7 @@ export default function Mycodes() {
       setData(data);
     } catch (error) {
       console.error("Error submitting code:", error);
+      localStorage.clear();
       alert("Error connecting server, please try again")
     }
   }

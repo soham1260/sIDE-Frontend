@@ -1,5 +1,3 @@
-// demoprograms.js
-
 const demoprograms = {
     c: `#include <stdio.h>
 int main() {

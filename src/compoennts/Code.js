@@ -7,6 +7,7 @@ import reset from '../assets/reset.svg'
 import cloud from '../assets/cloud.svg'
 import spinner from '../assets/spinner.gif'
 import demoprograms from '../data/demoprograms';
+import languageinfo from '../data/languageinfo';
 import { state } from './state/State'
 import {useParams, useNavigate} from 'react-router-dom'
 
@@ -19,6 +20,7 @@ export default function Code() {
   const [loading,setLoading] = useState(true);
   const [outputloading,setOutputLoading] = useState(false);
   const [saving,setSaving] = useState(false);
+  const [submit,setSubmit] = useState(true);
   
   const context = useContext(state);
   const { isLoggedIn,setIsLoggedIn } = context;
@@ -80,6 +82,7 @@ export default function Code() {
   }
 
   const handleSubmit = async () => {
+    setSubmit(false);
     setOutputLoading(true);
     try {
       const response = await fetch("https://side-backend.onrender.com/submitcode", {
@@ -101,6 +104,7 @@ export default function Code() {
       alert("Error connecting server, please try again")
     }
     setOutputLoading(false);
+    setSubmit(true);
   };
 
   
@@ -269,12 +273,21 @@ export default function Code() {
 
   return (
     <div style={{paddingTop: "1%"}}>
+
+      <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content" style={{backgroundColor: "#2c2c2c",color:"white",borderColor:"white"}}>
+            <div class="modal-body" dangerouslySetInnerHTML={{ __html: languageinfo[language] }}/>
+          </div>
+        </div>
+      </div>
+
       {loading ? <div className='spinner' style={{display: "flex", justifyContent:"center"}}><img src={spinner}/></div> :
       <div>
         <div className="row">
           <div className='d-flex col-md-8' style={{justifyContent: "space-between"}}>
             <div className='d-flex align-items-center'>
-              <button type="button" className="btn btn-outline-primary btn-sm" style={{borderRadius: "0"}} onClick={handleSubmit}>Submit</button>
+              <button type="button" className={"btn btn-outline-primary btn-sm" + (submit ? "" : " disabled")} style={{borderRadius: "0"}} onClick={handleSubmit}>Submit</button>
               <div className="dropdown" data-bs-theme="dark">
                 <button className="btn btn-outline-primary btn-sm dropdown-toggle" id="dropdownMenuButtonDark" style={{borderRadius: "0",width:"100px"}} type="button" data-bs-toggle="dropdown" aria-expanded="false">
                   {language==="cpp" ? "c++" : language}
@@ -287,6 +300,7 @@ export default function Code() {
                   <li><a className="dropdown-item" onClick={() => {handleLanguageChange("javascript")}}>Javascript</a></li>
                 </ul>
               </div>
+              <button type="button" class="btn btn-outline-primary btn-sm" style={{borderRadius: "0"}} data-bs-toggle="modal" data-bs-target="#exampleModal">ⓘ</button>
               {
                 language==='java' && <input type="text" style={{border: "1px solid #0D6EFD",backgroundColor: "#2c2c2c", outline: "none",color:"white",width:"80%",fontSize: "large",paddingLeft:"1%"}} value={filename} onChange={(e) => {setFileName(e.target.value)}}/>
               }
