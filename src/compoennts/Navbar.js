@@ -15,7 +15,7 @@ export default function Navbar() {
   }, [])
   
   const handleLogout = () => {
-    const confirmUpdate = window.confirm(`Auto save session will be cleared. Please save or download the code. Click OK to proceed Login.`);
+    const confirmUpdate = window.confirm(`Auto save session will be cleared. Please save or download the code. Click OK to proceed Logout.`);
     if (confirmUpdate) {
       localStorage.clear();
       setIsLoggedIn(false);
