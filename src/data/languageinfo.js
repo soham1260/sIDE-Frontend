@@ -1,5 +1,5 @@
 const languageinfo = {
-    c: "<img src=`https://logodix.com/logo/1709678.png`/>Compiled with GCC 14 using the GNU17 standard.<br/><br/>Library headers are not automatically added. Please include them as required.<br/><br/>Execution timeout: 5 sec.<br/>Output Limit: 500000 characters.",
+    c: "Compiled with GCC 14 using the GNU17 standard.<br/><br/>Library headers are not automatically added. Please include them as required.<br/><br/>Execution timeout: 5 sec.<br/>Output Limit: 500000 characters.",
     cpp: "Compiled with GCC 14 using the C++17 standard.<br/><br/>Library headers are not automatically added. Please include them as required.<br/><br/>Execution timeout: 5 sec.<br/>Output Limit: 500000 characters.",
     java: "Compiled with OpenJDK 18.<br/><br/>Entry class name must be same as file name.<br/><br/>Library headers are not automatically added. Please include them as required.<br/><br/>Execution timeout: 5 sec.<br/>Output Limit: 500000 characters.",
     python: "Running on Python 3.12.3.<br/><br/>Library headers are not automatically added. Please include them as required.<br/><br/>Execution timeout: 5 sec.<br/>Output Limit: 500000 characters.",
