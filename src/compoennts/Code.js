@@ -137,6 +137,9 @@ export default function Code() {
     if(confirmUpdate){
       const selectedFile = event.target.files[0];
       if (selectedFile) {
+        const fileNameWithExtension = selectedFile.name;
+        const fileName = fileNameWithExtension.substring(0, fileNameWithExtension.lastIndexOf('.')) || fileNameWithExtension;
+        setFileName(fileName);
         const reader = new FileReader();
         reader.readAsText(selectedFile);
         reader.onload = (e) => {
