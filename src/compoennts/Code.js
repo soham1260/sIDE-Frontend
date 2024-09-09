@@ -5,11 +5,12 @@ import upload from '../assets/upload.svg'
 import download from '../assets/download.svg'
 import reset from '../assets/reset.svg'
 import cloud from '../assets/cloud.svg'
+import share from '../assets/share.svg'
 import spinner from '../assets/spinner.gif'
 import demoprograms from '../data/demoprograms';
 import languageinfo from '../data/languageinfo';
 import { state } from './state/State'
-import {useParams, useNavigate} from 'react-router-dom'
+import {useParams, useNavigate, useLocation} from 'react-router-dom'
 
 export default function Code() {
   const [code, setCode] = useState("");
@@ -26,6 +27,7 @@ export default function Code() {
   const { isLoggedIn,setIsLoggedIn } = context;
   const navigate = useNavigate();
   const { id } = useParams();
+  const location = useLocation();
 
   useEffect(() => {
     const loadContent = async () => {
@@ -55,7 +57,7 @@ export default function Code() {
   
   const fetchCode = async (id) => {
     try {
-      const response = await fetch(`https://side-backend.onrender.com/fetchcode?id=${id}`, {
+      const response = await fetch(`http://localhost:5000/fetchcode?id=${id}`, {
         method: "GET",
         headers: {
           'Content-Type': 'application/json',
@@ -85,7 +87,7 @@ export default function Code() {
     setSubmit(false);
     setOutputLoading(true);
     try {
-      const response = await fetch("https://side-backend.onrender.com/submitcode", {
+      const response = await fetch("http://localhost:5000/submitcode", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -194,7 +196,7 @@ export default function Code() {
   const checkFile = async () => {
 
     try {
-      const response = await fetch("https://side-backend.onrender.com/checkfileexists", {
+      const response = await fetch("http://localhost:5000/checkfileexists", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -217,7 +219,7 @@ export default function Code() {
   
   const saveFile = async() => {
     try {
-      const response = await fetch("https://side-backend.onrender.com/savefile", {
+      const response = await fetch("http://localhost:5000/savefile", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -277,10 +279,32 @@ export default function Code() {
   return (
     <div style={{paddingTop: "1%"}}>
 
-      <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content" style={{backgroundColor: "#2c2c2c",color:"white",borderColor:"white"}}>
-            <div class="modal-body" dangerouslySetInnerHTML={{ __html: languageinfo[language] }}/>
+      <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content" style={{backgroundColor: "#2c2c2c",color:"white",borderColor:"white"}}>
+            <div className="modal-body" dangerouslySetInnerHTML={{ __html: languageinfo[language] }}/>
+          </div>
+        </div>
+      </div>
+      
+      <div className="modal fade" id="shareFile" tabIndex="-1" aria-labelledby="shareFile" aria-hidden="true">
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content" style={{backgroundColor: "#2c2c2c",color:"white",borderColor:"white"}}>
+            <div className="modal-body">
+              <h3 style={{display:"flex",justifyContent:"center"}}>Share Code</h3>
+              <h5>File Name</h5>
+              <input type="text" placeholder='Enter Name' defaultValue={filename} style={{border: "none", border: "1px solid white",backgroundColor: "#2c2c2c", outline: "none",color:"white",width:"100%",padding:"5px",paddingLeft:"10px",fontSize: "large",borderRadius:"5px",marginBottom:"15px"}}/>
+              <button type="button" className="btn btn-outline-primary" style={{marginBottom:"15px"}}>Generate Link</button>
+              <div style={{display:"flex",flexDirection:"column"}}>
+                <div style={{display:"flex"}}>
+                  <input type="text" disabled placeholder='Link' style={{border: "none", border: "1px solid white",backgroundColor: "#2c2c2c", outline: "none",color:"white",width:"100%",padding:"5px",paddingLeft:"10px",fontSize: "large",borderRadius:"5px"}}/>
+                  <img className="ico" style={{marginLeft: "15px"}} src={copy} width={"20px"} onClick={() => {navigator.clipboard.writeText(code)}}/>
+                </div>
+                <div style={{paddingTop:"15px"}}>
+                  The link is valid only for 24 hours. <br/><p>The link is bound to copy of this code. Modifying the code accessible by the link won't alter this code.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -303,7 +327,7 @@ export default function Code() {
                   <li><a className="dropdown-item" onClick={() => {handleLanguageChange("javascript")}}>Javascript</a></li>
                 </ul>
               </div>
-              <button type="button" class="btn btn-outline-primary btn-sm" style={{borderRadius: "0"}} data-bs-toggle="modal" data-bs-target="#exampleModal">ⓘ</button>
+              <button type="button" className="btn btn-outline-primary btn-sm" style={{borderRadius: "0"}} data-bs-toggle="modal" data-bs-target="#exampleModal">ⓘ</button>
               {
                 language==='java' && <input type="text" style={{border: "1px solid #0D6EFD",backgroundColor: "#2c2c2c", outline: "none",color:"white",width:"80%",fontSize: "large",paddingLeft:"1%"}} value={filename} onChange={(e) => {setFileName(e.target.value)}}/>
               }
@@ -315,6 +339,7 @@ export default function Code() {
             <div>
               <img className="ico" style={{marginRight: "15px"}} src={reset} width={"20px"} onClick={() => {localStorage.setItem(language, "");handleLanguageChange(language)}}/>
               <img className="ico" style={{marginRight: "15px"}} src={copy} width={"20px"} onClick={() => {navigator.clipboard.writeText(code)}}/>
+              <img className="ico" style={{marginRight: "13px"}} src={share} width={"23px"} data-bs-toggle="modal" data-bs-target="#shareFile"/>
               <img className="ico" style={{marginRight: "15px"}} src={download} width={"23px"} onClick={handleCodeDownload}/>
               <img className="ico" style={{marginRight: "40px"}} src={upload} width={"23px"} onClick={() => {document.getElementById('codeInput').click();}}/>
             </div>
