@@ -14,20 +14,23 @@ export default function Login() {
 
   const handleSubmit = async(e) => {
       e.preventDefault();
-      console.log(Credentials);
-      const response = await fetch(`http://localhost:5000/login`,{method : 'POST',headers : {'Content-Type' : 'application/json'},body : JSON.stringify({email : Credentials.email,password : Credentials.password})});
-      const json=await response.json();
-      console.log(json);
+      try {
+        const response = await fetch(`https://side-backend.onrender.com/login`,{method : 'POST',headers : {'Content-Type' : 'application/json'},body : JSON.stringify({email : Credentials.email,password : Credentials.password})});
+        const json=await response.json();
+        console.log(json);
 
-      if(json.success)
-      {
-        localStorage.setItem('token', json.authtoken);
-        setIsLoggedIn(true);
-        navigate('/');
-      }
-      else
-      {
-        setError(true);
+        if(json.success)
+        {
+          localStorage.setItem('token', json.authtoken);
+          setIsLoggedIn(true);
+          navigate('/');
+        }
+        else
+        {
+          setError(true);
+        }
+      } catch (error) {
+        alert("Internal Server Error")
       }
   }
 

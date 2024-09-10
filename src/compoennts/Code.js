@@ -1,4 +1,4 @@
-import React, { useState,useEffect,useContext } from 'react';
+import React, { useState,useEffect,useContext,useRef } from 'react';
 import Editor from '@monaco-editor/react';
 import copy from '../assets/copy.svg'
 import upload from '../assets/upload.svg'
@@ -13,6 +13,7 @@ import { state } from './state/State'
 import {useParams, useNavigate, useLocation} from 'react-router-dom'
 
 export default function Code() {
+  const modalRef = useRef(null);
   const [code, setCode] = useState("");
   const [ans, setAns] = useState("");
   const [input, setInput] = useState("");
@@ -22,7 +23,11 @@ export default function Code() {
   const [outputloading,setOutputLoading] = useState(false);
   const [saving,setSaving] = useState(false);
   const [submit,setSubmit] = useState(true);
-  
+  const [sharedCode,setSharedCode] = useState(false);
+  const [generateLink,setGenerateLink] = useState(false);
+  const [sharedCodeLink,setsharedCodeLink] = useState("");
+  const [sharedFileName,setSharedFileName] = useState("");
+
   const context = useContext(state);
   const { isLoggedIn,setIsLoggedIn } = context;
   const navigate = useNavigate();
@@ -31,19 +36,28 @@ export default function Code() {
 
   useEffect(() => {
     const loadContent = async () => {
-      if(id) {
-        await fetchCode(id);
+
+      if (location.pathname.startsWith('/code')) {
+        if(id)
+        {
+          await fetchCode(id);
+        }
+        else if(localStorage.getItem("c") && localStorage.getItem("c").length !== 0)
+        {
+          setLanguage("c");
+          setCode(localStorage.getItem("c"));
+          setFileName("main");
+        }
+        else {
+          setLanguage("c");
+          setCode(demoprograms["c"]);
+          setFileName("main");
+        }
       }
-      else if(localStorage.getItem("c") && localStorage.getItem("c").length !== 0)
+      else if(location.pathname.startsWith('/sharedcode'))
       {
-        setLanguage("c");
-        setCode(localStorage.getItem("c"));
-        setFileName("main");
-      }
-      else {
-        setLanguage("c");
-        setCode(demoprograms["c"]);
-        setFileName("main");
+        setSharedCode(true);
+        await fetchSharedCode(id);
       }
   
       if (localStorage.getItem("token")){
@@ -53,11 +67,30 @@ export default function Code() {
 
     loadContent();
     setLoading(false)
-  }, [id])
+  }, [id]);
+
+  useEffect(() => {
+    const handleModalHidden = () => {
+      setSharedFileName("");
+      setGenerateLink(false);
+    };
+
+    const modalElement = modalRef.current;
+
+    if (modalElement) {
+      modalElement.addEventListener('hidden.bs.modal', handleModalHidden);
+    }
+
+    return () => {
+      if (modalElement) {
+        modalElement.removeEventListener('hidden.bs.modal', handleModalHidden);
+      }
+    };
+  }, []);
   
   const fetchCode = async (id) => {
     try {
-      const response = await fetch(`http://localhost:5000/fetchcode?id=${id}`, {
+      const response = await fetch(`https://side-backend.onrender.com/fetchcode?id=${id}`, {
         method: "GET",
         headers: {
           'Content-Type': 'application/json',
@@ -83,11 +116,32 @@ export default function Code() {
     }
   }
 
+  const fetchSharedCode = async (id) => {
+    try {
+      const response = await fetch(`https://side-backend.onrender.com/sharedcode/${id}`, {
+        method: "GET",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      });
+      
+      const data = await response.json();
+      if(!response.ok){
+        navigate("/notfound");
+      }
+      setLanguage(data.language);
+      setCode(data.code);
+      setFileName(data.name);
+    } catch (error) {
+      navigate("/notfound")
+    }
+  }
+
   const handleSubmit = async () => {
     setSubmit(false);
     setOutputLoading(true);
     try {
-      const response = await fetch("http://localhost:5000/submitcode", {
+      const response = await fetch("https://side-backend.onrender.com/submitcode", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -196,7 +250,7 @@ export default function Code() {
   const checkFile = async () => {
 
     try {
-      const response = await fetch("http://localhost:5000/checkfileexists", {
+      const response = await fetch("https://side-backend.onrender.com/checkfileexists", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -219,7 +273,7 @@ export default function Code() {
   
   const saveFile = async() => {
     try {
-      const response = await fetch("http://localhost:5000/savefile", {
+      const response = await fetch("https://side-backend.onrender.com/savefile", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -276,6 +330,48 @@ export default function Code() {
     
   }
 
+  const genLink = async () => {
+    setGenerateLink(true);
+    let name = sharedFileName.length === 0 ? filename : sharedFileName;
+    try {
+      const response = await fetch("https://side-backend.onrender.com/sharecode", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ language, code, name})
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.message || "Error connecting to server");
+      }
+      
+      setsharedCodeLink("https://side-28r4.onrender.com/sharedcode/"+data.urlid);
+    } catch (error) {
+      throw new Error(error.message || "Error connecting to server");
+    }
+  }
+
+  const syncCode = async () => {
+    try {
+      const response = await fetch("https://side-backend.onrender.com/synccode", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ language, code, id})
+      });
+  
+      if (!response.ok) {
+        navigate("/notfound");
+      }
+    } catch (error) {
+      throw new Error(error.message || "Error connecting to server");
+    }
+  }
+  
   return (
     <div style={{paddingTop: "1%"}}>
 
@@ -287,23 +383,27 @@ export default function Code() {
         </div>
       </div>
       
-      <div className="modal fade" id="shareFile" tabIndex="-1" aria-labelledby="shareFile" aria-hidden="true">
+      <div className="modal fade" id="shareFile" tabIndex="-1" aria-labelledby="shareFile" aria-hidden="true" ref={modalRef}>
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content" style={{backgroundColor: "#2c2c2c",color:"white",borderColor:"white"}}>
             <div className="modal-body">
               <h3 style={{display:"flex",justifyContent:"center"}}>Share Code</h3>
               <h5>File Name</h5>
-              <input type="text" placeholder='Enter Name' defaultValue={filename} style={{border: "none", border: "1px solid white",backgroundColor: "#2c2c2c", outline: "none",color:"white",width:"100%",padding:"5px",paddingLeft:"10px",fontSize: "large",borderRadius:"5px",marginBottom:"15px"}}/>
-              <button type="button" className="btn btn-outline-primary" style={{marginBottom:"15px"}}>Generate Link</button>
-              <div style={{display:"flex",flexDirection:"column"}}>
-                <div style={{display:"flex"}}>
-                  <input type="text" disabled placeholder='Link' style={{border: "none", border: "1px solid white",backgroundColor: "#2c2c2c", outline: "none",color:"white",width:"100%",padding:"5px",paddingLeft:"10px",fontSize: "large",borderRadius:"5px"}}/>
-                  <img className="ico" style={{marginLeft: "15px"}} src={copy} width={"20px"} onClick={() => {navigator.clipboard.writeText(code)}}/>
-                </div>
-                <div style={{paddingTop:"15px"}}>
-                  The link is valid only for 24 hours. <br/><p>The link is bound to copy of this code. Modifying the code accessible by the link won't alter this code.</p>
-                </div>
-              </div>
+              <input type="text" placeholder='Enter File Name' value={sharedFileName} onChange={(e) => {setSharedFileName(e.target.value)}} style={{border: "none", border: "1px solid white",backgroundColor: "#2c2c2c", outline: "none",color:"white",width:"100%",padding:"5px",paddingLeft:"10px",fontSize: "large",borderRadius:"5px",marginBottom:"15px"}}/>
+              {!generateLink ? 
+                  <button type="button" className="btn btn-outline-primary" style={{marginBottom:"15px"}} onClick={genLink}>Generate Link</button>
+                :
+                (sharedCodeLink.length ===0 ? 
+                  <img src={spinner} width={"80px"}/>
+                  : <div style={{display:"flex",flexDirection:"column"}}>
+                    <div style={{display:"flex"}}>
+                      <input type="text" disabled placeholder='Link' value={sharedCodeLink} style={{border: "none", border: "1px solid white",backgroundColor: "#2c2c2c", outline: "none",color:"white",width:"100%",padding:"5px",paddingLeft:"10px",fontSize: "large",borderRadius:"5px"}}/>
+                      <img className="ico" style={{marginLeft: "15px"}} src={copy} width={"20px"} onClick={() => {navigator.clipboard.writeText(sharedCodeLink)}}/>
+                    </div>
+                    <div style={{paddingTop:"15px"}}>
+                      The link is valid only for 24 hours. <br/><p>The link is bound to copy of this code. Modifying the code accessible by the link won't alter this code.</p>
+                    </div>
+                </div>)}
             </div>
           </div>
         </div>
@@ -328,6 +428,7 @@ export default function Code() {
                 </ul>
               </div>
               <button type="button" className="btn btn-outline-primary btn-sm" style={{borderRadius: "0"}} data-bs-toggle="modal" data-bs-target="#exampleModal">ⓘ</button>
+              {sharedCode && <button type="button" className="btn btn-outline-primary btn-sm" style={{borderRadius: "0"}} onClick={syncCode}>Sync</button>}
               {
                 language==='java' && <input type="text" style={{border: "1px solid #0D6EFD",backgroundColor: "#2c2c2c", outline: "none",color:"white",width:"80%",fontSize: "large",paddingLeft:"1%"}} value={filename} onChange={(e) => {setFileName(e.target.value)}}/>
               }

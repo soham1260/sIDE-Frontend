@@ -10,7 +10,7 @@ export default function Mycodes() {
 
   const fetchUserData = async () => {
     try {
-      const response = await fetch("http://localhost:5000/fetchuserdata", {
+      const response = await fetch("https://side-backend.onrender.com/fetchuserdata", {
         method: "GET",
         headers: {
           'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ export default function Mycodes() {
 
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(`http://localhost:5000/deletecode?id=${id}`, {
+      const response = await fetch(`https://side-backend.onrender.com/deletecode?id=${id}`, {
         method: "GET",
         headers: {
           'Content-Type': 'application/json',
