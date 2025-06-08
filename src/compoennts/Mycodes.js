@@ -111,9 +111,9 @@ export default function Mycodes() {
                                 <h5 style={{margin:"0"}}>{code.filename}.{code.language === "python" ? "py" : (code.language === "javascript" ? "js" : code.language)}</h5>
                             </div>
                             <div className='col-md-4' style={{display: "flex", flexDirection: "row", justifyContent: "space-evenly",alignItems:"center", height: "100%"}}>
-                                <button type="button" class="btn btn-outline-light" style={{width:"100px"}} onClick={() => {handleDownload(code.code,code.filename,code.language)}}>Download</button>
-                                <button type="button" class="btn btn-outline-primary" style={{width:"100px"}} onClick={() => {navigate(`/code/${code._id}`)}}>Edit</button>
-                                <button type="button" class="btn btn-outline-danger" style={{width:"100px"}} onClick={() => {handleDelete(code._id)}}>Delete</button>
+                                <button type="button" className="btn btn-outline-light" style={{width:"100px"}} onClick={() => {handleDownload(code.code,code.filename,code.language)}}>Download</button>
+                                <button type="button" className="btn btn-outline-primary" style={{width:"100px"}} onClick={() => {navigate(`/code/${code._id}`)}}>Edit</button>
+                                <button type="button" className="btn btn-outline-danger" style={{width:"100px"}} onClick={() => {handleDelete(code._id)}}>Delete</button>
                             </div>
                             <hr style={{ width: "100%", height: "2px", backgroundColor: "#00aeefcc", margin: "0px" , border: "0px"}} />
                         </div>

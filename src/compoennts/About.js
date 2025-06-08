@@ -8,14 +8,15 @@ import express from '../assets/express.png';
 import docker from '../assets/docker.png';
 import react from '../assets/react.png';
 import azure from '../assets/azure.png';
+import ai from '../assets/ai.png';
 
 export default function About() {
   return (
     <div className='container' style={{ paddingTop: "1%"}}>
       <h1 style={{color: "white"}}>About</h1>
-      <p style={{paddingTop: "0px", margin: "0px", color: "white"}}>From a coder, for a coder. Hi, I am Soham, the creator of this awesome website.</p>
+      <p style={{paddingTop: "0px", margin: "0px", color: "white"}}>From a coder, for a coder. Hi, I am Soham, the creator of this awesome website. <a style={{textDecoration:"none"}} href="https://soham-khatavkar.onrender.com/">Know more about me!</a></p>
       <p style={{paddingTop: "10px", margin: "0px", color: "white"}}>Here's the source code!</p>
-      <p style={{paddingTop: "10px", margin: "0px", color: "white"}}><a href="https://github.com/soham1260/sIDE-Frontend">Frontend</a> | <a href="https://github.com/soham1260/sIDE-backend">Backend</a></p>
+      <p style={{paddingTop: "10px", margin: "0px", color: "white"}}><a style={{textDecoration:"none"}} href="https://github.com/soham1260/sIDE-Frontend">Frontend</a> | <a style={{textDecoration:"none"}} href="https://github.com/soham1260/sIDE-backend">Backend</a></p>
       <p style={{paddingTop: "10px", margin: "0px", color: "white"}}>The major components that helped me build this awesome website,</p>
       <div className="row" style={{width : '100%', paddingBottom: "3%"}}>
 
@@ -78,6 +79,13 @@ export default function About() {
         <div style={{height: "120px", display: "flex", alignItems: "center", color: "white" }}>
           <div className="col-md-10">Microsoft Azure, often referred to as Azure, is a cloud computing platform developed by Microsoft. It offers access, management, and the development of applications and services through global data centers. For this project, Azure Virtual Machines were used to host docker containers.</div>
           <div className="col-md-2" style={{display:"flex",justifyContent:"center"}}><img src={azure} alt="html" width="120px"/></div>
+        </div>
+
+        <hr style={{ width: "100%", height: "2px", backgroundColor: "#00aeefcc", margin: "0px" , border: "0px" }} />
+
+        <div style={{height: "120px", display: "flex", alignItems: "center", color: "white" }}>
+          <div className="col-md-2" style={{display:"flex",justifyContent:"center"}}><img src={ai} alt="html" width="100px"/></div>
+          <div className="col-md-10">Gemini AI is Google's advanced AI model, designed to serve as a personal assistant and enhance productivity. It is characterized by its ability to reason through its responses, particularly in complicated tasks such as coding, data visualization, and generating creative content. Gemini AI is integrated in sIDE+ to assist you throughout your coding journey.</div>
         </div>
 
       </div>

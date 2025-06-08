@@ -11,6 +11,7 @@ import demoprograms from '../data/demoprograms';
 import languageinfo from '../data/languageinfo';
 import { state } from './state/State'
 import {useParams, useNavigate, useLocation} from 'react-router-dom'
+import { marked } from "marked";
 
 export default function Code() {
   const modalRef = useRef(null);
@@ -28,11 +29,27 @@ export default function Code() {
   const [sharedCodeLink,setsharedCodeLink] = useState("");
   const [sharedFileName,setSharedFileName] = useState("");
 
+  const [Prompt,setPrompt] = useState("");
+  
+  const [Response,setResponse] = useState("");
+
+  const timeouts = useRef([]);
+
+  const [Generating,setGenerating] = useState(false);
+
+  const GeneratingRef = useRef(false);
+
+  useEffect(() => {
+    GeneratingRef.current = Generating;
+  }, [Generating]);
+
   const context = useContext(state);
   const { isLoggedIn,setIsLoggedIn } = context;
   const navigate = useNavigate();
   const { id } = useParams();
   const location = useLocation();
+
+  const [checked, setChecked] = useState(false);
 
   useEffect(() => {
     const loadContent = async () => {
@@ -372,6 +389,62 @@ export default function Code() {
     }
   }
   
+  const onPromptChange = (e) => {
+      setPrompt(e.target.value)
+    };
+  
+  const handlePrompt = async() => {
+    setResponse("");
+    setGenerating(true);
+    fetch("https://side-backend.onrender.com/ai",{
+      method: 'Post',
+      headers: {
+        'Content-Type': 'application/json',
+        'auth-token': localStorage.getItem('token')
+      },
+      body: JSON.stringify({
+        prompt: Prompt,
+        ...(checked && { code: code }),
+        language: language
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (!GeneratingRef.current) {
+        // If stopped before response arrived, do nothing here
+        return;
+      }
+      timeouts.current.forEach(clearTimeout);
+      timeouts.current = [];
+      const fullText = marked(data.response ? data.response : "Please Enter the message!");
+      for (let i = 0; i < fullText.length; i++) {
+        const timeout = setTimeout(() => {
+          setResponse(prev => prev + fullText.charAt(i));
+        }, i * 10);
+        timeouts.current.push(timeout);
+      }
+      const finalTimeout = setTimeout(() => {
+        setGenerating(false);
+      }, fullText.length * 10);
+      timeouts.current.push(finalTimeout);
+    });
+  }
+
+  const handleCopy = (append) => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(Response, "text/html");
+    const codeElement = doc.querySelector("code");
+
+    const extracted = codeElement ? codeElement.textContent : null;
+
+    if(append) {
+      setCode(code+extracted);
+    }
+    else {
+      setCode(extracted);
+    }
+  }
+
   return (
     <div style={{paddingTop: "1%"}}>
 
@@ -383,6 +456,56 @@ export default function Code() {
         </div>
       </div>
       
+      <div className="modal fade" id="AIModal" tabIndex="-1" aria-labelledby="AIModalLabel" aria-hidden="true">
+        <div className="modal-dialog" style={{width:"850px", maxWidth:"90%"}}>
+          <div className="modal-content" style={{backgroundColor: "#2c2c2c",color:"white",borderColor:"white"}}>
+            <div className="modal-header">
+              <h5 className="modal-title" id="AIModalLabel">Need help with code? Ask right away!</h5>
+              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div className="modal-body">
+              <textarea
+                placeholder="What does this code do?"
+                className="form-control custom-textarea"
+                type="text"
+                name="prompt"
+                value={Prompt}
+                onChange={onPromptChange}
+              />
+              <div dangerouslySetInnerHTML={{ __html: Response }} style={{marginTop:"15px"}}/>
+            </div>
+            <div className="modal-footer">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" checked={checked} onChange={() => setChecked(!checked)} style={{transform: "scale(1.2)",marginRight:"5px"}}/>
+                <label class="form-check-label" for="flexCheckDefault">
+                  Include code with query
+                </label>
+              </div>
+              <button type="button" className="btn abtn" onClick={() => {handleCopy(true)}}>
+                Append to code
+              </button>
+              <button type="button" className="btn abtn" onClick={() => {handleCopy(false)}}>
+                Overwrite on code
+              </button>
+              <button type="button" className="btn abtn" onClick={() => navigator.clipboard.writeText(Response)}>
+                Copy
+              </button>
+              {Generating ? (<button
+                type="button"
+                className="btn sbtn"
+                // data-dismiss="modal"
+                onClick={() => {timeouts.current.forEach(clearTimeout);timeouts.current = [];setGenerating(false);}}
+              >
+                Stop
+              </button>) :
+              (<button type="button" className="btn abtn" onClick={handlePrompt}>
+                Ask
+              </button>)}
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="modal fade" id="shareFile" tabIndex="-1" aria-labelledby="shareFile" aria-hidden="true" ref={modalRef}>
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content" style={{backgroundColor: "#2c2c2c",color:"white",borderColor:"white"}}>
@@ -401,7 +524,7 @@ export default function Code() {
                       <img className="ico" style={{marginLeft: "15px"}} src={copy} width={"20px"} onClick={() => {navigator.clipboard.writeText(sharedCodeLink)}}/>
                     </div>
                     <div style={{paddingTop:"15px"}}>
-                      The link is valid only for 24 hours. <br/><p>The link is bound to copy of this code. Modifying the code accessible by the link won't alter this code.</p>
+                      The link is valid only for 24 hours. <br/><p>The link is bound to a copy of this code. Modifying the code accessible by the link won't alter this code.</p>
                     </div>
                 </div>)}
             </div>
@@ -428,6 +551,9 @@ export default function Code() {
                 </ul>
               </div>
               <button type="button" className="btn btn-outline-primary btn-sm" style={{borderRadius: "0"}} data-bs-toggle="modal" data-bs-target="#exampleModal">ⓘ</button>
+              <button type="button" className="btn btn-outline-primary btn-sm" style={{borderRadius: "0",textWrap:"nowrap"}} data-bs-toggle="modal" data-bs-target="#AIModal">
+                Ask AI
+              </button>
               {sharedCode && <button type="button" className="btn btn-outline-primary btn-sm" style={{borderRadius: "0"}} onClick={syncCode}>Sync</button>}
               {
                 language==='java' && <input type="text" style={{border: "1px solid #0D6EFD",backgroundColor: "#2c2c2c", outline: "none",color:"white",width:"80%",fontSize: "large",paddingLeft:"1%"}} value={filename} onChange={(e) => {setFileName(e.target.value)}}/>

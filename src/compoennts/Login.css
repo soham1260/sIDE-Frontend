@@ -111,3 +111,53 @@
 .social i{
   margin-right: 4px;
 }
+
+.custom-textarea {
+  height: 10px;
+  max-width: 100%;
+  background-color: transparent;   
+  border: none;                    
+  border-bottom: 2px solid #ccc;
+  border-radius: 0%;
+  color: white;
+  font-size: large;
+}
+
+.custom-textarea::placeholder {
+  color: #999;
+  opacity: 1;
+}
+
+.custom-textarea:focus {
+  background-color: transparent;
+  color: white;
+  border-bottom: 2px solid #007bff;
+}
+
+.abtn {
+  color: #fff;
+  background-color: #434040;
+  border-color: #ffffff;
+}
+
+.abtn:hover {
+  color: #000000;
+  background-color: #ffffff;
+  border-color: #ffffff;
+}
+
+.sbtn {
+  color: #ff0000;
+  background-color: #434040;
+  border-color: #ff0000;
+}
+
+.sbtn:hover {
+  color: #fff;
+  background-color: #ff0000;
+  border-color: #ff0000;
+}
+
+.modal-header .btn-close {
+  filter: invert(1);
+}
