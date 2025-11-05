@@ -1,70 +1,99 @@
-# Getting Started with Create React App
+# sIDE-Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+sIDE-Frontend is the frontend application for sIDE — a lightweight, browser-based source code editor / IDE. This repository contains the UI, editor integration, and client-side features that allow users to write, run, and debug code in the sIDE platform.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## Table of contents
 
-### `npm start`
+- [Features](#features)
+- [Tech stack](#tech-stack)
+- [Getting started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Quick start](#quick-start)
+- [Project structure](#project-structure)
+- [Deployments](#deployments)
+- [Contact](#contact)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Features
 
-### `npm test`
+- Rich text/code editor integration (Monaco) with features like auto-save
+- Syntax highlighting and auto-complete support
+- File explorer and workspace management
+- Multi-language support
+- Code upload/download
+- Code sharing
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## Tech stack
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- Framework: ReactJS
+- Language: JavaScript
+- Build tool: Create React App
+- Editor integration: Monaco Editor
+- State management: Context API
+- Styling: CSS Modules / Bootstrap
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## Getting started
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Prerequisites
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- Node.js >= 16 (or the version used in this repo)
+- npm >= 8
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Quick start
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+1. Clone the repository  
+   ```bash
+   git clone https://github.com/soham1260/sIDE-Frontend.git
+   cd sIDE-Frontend
+   ```
 
-## Learn More
+2. Install dependencies 
+     ```bash
+     npm install
+     ```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+3. Start the server  
+     ```bash
+     npm start
+     ```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+5. Open your browser  
+   Visit http://localhost:3000 (or the URL printed by the dev server)
 
-### Code Splitting
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## Project structure
 
-### Analyzing the Bundle Size
+- public/ — static assets
+- src/
+  - assets/ — images, fonts
+  - components/ — reusable UI components
+  - data/ — default snippets
+- package.json — scripts & dependencies
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+---
 
-### Making a Progressive Web App
+## Deployments
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+- Static hosting: Vercel / Netlify / GitHub Pages (for SPA)
+- Containerized: Docker image pushed to registry
+- CI/CD: GitHub Actions / other pipeline
 
-### Advanced Configuration
+Example: Build and deploy to Netlify or Vercel by connecting the repo and pointing the build command to `npm run build` and the output directory to `dist` (or `build`).
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+---
 
-### Deployment
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## Contact
 
-### `npm run build` fails to minify
+Maintainer: 1260soham@gmail.com
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+---
