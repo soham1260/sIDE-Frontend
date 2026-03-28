@@ -16,7 +16,7 @@ export default function Signup() {
 			e.preventDefault();
 			try {
         const {name , email , password } = Credentials;
-        const response = await fetch(`https://side-backend.onrender.com/signup`,{method : 'POST',headers : {'Content-Type' : 'application/json'},body : JSON.stringify({name,email,password})});
+        const response = await fetch(process.env.REACT_APP_BACKEND_URL+"signup",{method : 'POST',headers : {'Content-Type' : 'application/json'},body : JSON.stringify({name,email,password})});
         const json=await response.json();
         console.log(json);
 

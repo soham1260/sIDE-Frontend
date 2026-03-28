@@ -107,7 +107,7 @@ export default function Code() {
   
   const fetchCode = async (id) => {
     try {
-      const response = await fetch(`https://side-backend.onrender.com/fetchcode?id=${id}`, {
+      const response = await fetch(process.env.REACT_APP_BACKEND_URL+"fetchcode?id="+id, {
         method: "GET",
         headers: {
           'Content-Type': 'application/json',
@@ -135,7 +135,7 @@ export default function Code() {
 
   const fetchSharedCode = async (id) => {
     try {
-      const response = await fetch(`https://side-backend.onrender.com/sharedcode/${id}`, {
+      const response = await fetch(process.env.REACT_APP_BACKEND_URL+"sharedcode/"+id, {
         method: "GET",
         headers: {
           'Content-Type': 'application/json'
@@ -158,7 +158,7 @@ export default function Code() {
     setSubmit(false);
     setOutputLoading(true);
     try {
-      const response = await fetch("https://side-backend.onrender.com/submitcode", {
+      const response = await fetch(process.env.REACT_APP_BACKEND_URL+"submitcode", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -267,7 +267,7 @@ export default function Code() {
   const checkFile = async () => {
 
     try {
-      const response = await fetch("https://side-backend.onrender.com/checkfileexists", {
+      const response = await fetch(process.env.REACT_APP_BACKEND_URL+"checkfileexists", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -290,7 +290,7 @@ export default function Code() {
   
   const saveFile = async() => {
     try {
-      const response = await fetch("https://side-backend.onrender.com/savefile", {
+      const response = await fetch(process.env.REACT_APP_BACKEND_URL+"savefile", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -351,7 +351,7 @@ export default function Code() {
     setGenerateLink(true);
     let name = sharedFileName.length === 0 ? filename : sharedFileName;
     try {
-      const response = await fetch("https://side-backend.onrender.com/sharecode", {
+      const response = await fetch(process.env.REACT_APP_BACKEND_URL+"sharecode", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -373,7 +373,7 @@ export default function Code() {
 
   const syncCode = async () => {
     try {
-      const response = await fetch("https://side-backend.onrender.com/synccode", {
+      const response = await fetch(process.env.REACT_APP_BACKEND_URL+"synccode", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -396,7 +396,7 @@ export default function Code() {
   const handlePrompt = async() => {
     setResponse("");
     setGenerating(true);
-    fetch("https://side-backend.onrender.com/ai",{
+    fetch(process.env.REACT_APP_BACKEND_URL+"ai",{
       method: 'Post',
       headers: {
         'Content-Type': 'application/json',

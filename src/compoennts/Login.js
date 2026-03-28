@@ -15,7 +15,7 @@ export default function Login() {
   const handleSubmit = async(e) => {
       e.preventDefault();
       try {
-        const response = await fetch(`https://side-backend.onrender.com/login`,{method : 'POST',headers : {'Content-Type' : 'application/json'},body : JSON.stringify({email : Credentials.email,password : Credentials.password})});
+        const response = await fetch(process.env.REACT_APP_BACKEND_URL+"login",{method : 'POST',headers : {'Content-Type' : 'application/json'},body : JSON.stringify({email : Credentials.email,password : Credentials.password})});
         const json=await response.json();
         console.log(json);
 
