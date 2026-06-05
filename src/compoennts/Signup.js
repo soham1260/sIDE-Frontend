@@ -1,88 +1,86 @@
-import React,{useState,useContext} from 'react'
-import {Link,useNavigate} from 'react-router-dom'
+import React, { useState, useContext } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import './Login.css'
 import { state } from './state/State'
 
 export default function Signup() {
 
-    const [Credentials, setCredentials] = useState({name : "", email : "", password : ""});
-	  const [Error, setError] = useState({ errors: [] });
-	  let navigate = useNavigate();
+  const [Credentials, setCredentials] = useState({ name: "", email: "", password: "" });
+  const [Error, setError] = useState({ errors: [] });
+  let navigate = useNavigate();
 
-    const context = useContext(state);
-    const { setIsLoggedIn } = context;
+  const context = useContext(state);
+  const { setIsLoggedIn } = context;
 
-		const handleSubmit = async (e) => {
-			e.preventDefault();
-			try {
-        const {name , email , password } = Credentials;
-        const response = await fetch(process.env.REACT_APP_BACKEND_URL+"signup",{method : 'POST',headers : {'Content-Type' : 'application/json'},body : JSON.stringify({name,email,password})});
-        const json=await response.json();
-        console.log(json);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const { name, email, password } = Credentials;
+      const response = await fetch(process.env.REACT_APP_BACKEND_URL + "signup", { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, email, password }) });
+      const json = await response.json();
+      console.log(json);
 
-        if(json.success)
-        {
-          localStorage.setItem('token', json.authtoken);
-          setIsLoggedIn(true);
-          navigate('/');
-        }
-        else
-        {
-          setError(json);
-        }
-      } catch (error) {
-        alert("Internal Server Error")
+      if (json.success) {
+        localStorage.setItem('token', json.authtoken);
+        setIsLoggedIn(true);
+        navigate('/');
       }
-		}
+      else {
+        setError(json);
+      }
+    } catch (error) {
+      alert("Internal Server Error")
+    }
+  }
 
-	const onChange = (e) => {
-		setCredentials({...Credentials,[e.target.name] : e.target.value})
-	}
+  const onChange = (e) => {
+    setCredentials({ ...Credentials, [e.target.name]: e.target.value })
+  }
 
   return (
     <div>
-        <div className="background">
-            <div className="shape"></div>
-            <div className="shape"></div>
-        </div>
-        <form id='loginForm' style={{padding:"30px 35px",height:"auto"}}>
-            <h1 style={{fontFamily: "Orbitron"}}>sIDE+</h1>
+      <div className="background">
+        <div className="shape"></div>
+        <div className="shape"></div>
+      </div>
+      <form id='loginForm' style={{ padding: "30px 35px", height: "auto" }}>
+        <h1 style={{ fontFamily: "Orbitron" }}>sIDE+</h1>
 
-            <h3 style={{marginTop:"5%"}}>Signup</h3>
+        <h3 style={{ marginTop: "5%" }}>Signup</h3>
 
-            <label id='loginLabel' htmlFor="username" style={{marginTop:"2%"}}>Name</label>
-            <input type="text" placeholder="Name" id="loginInput" name='name' onChange={onChange}/>
-            {
-              Error.errors && Error.errors.some(error => error.msg === "name") && <div style={{height:"7%",marginTop:"1%"}}><p className="error-message" style={{margin:"0"}}>Name must be alteast 3 characters</p></div>
-            }
-            
-            <label id='loginLabel' htmlFor="username" style={{marginTop:"5%"}}>Email</label>
-            <input type="text" placeholder="Email" id="loginInput" name='email' onChange={onChange}/>
-            {
-              Error.errors && Error.errors.some(error => error.msg === "exist") && <div style={{height:"7%",marginTop:"1%"}}><p className="error-message" style={{margin:"0"}}>Email already exists, please <Link to="/login" >Login</Link></p></div>
-            }
-            {
-              Error.errors && Error.errors.some(error => error.msg === "email") && <div style={{height:"7%",marginTop:"1%"}}><p className="error-message" style={{margin:"0"}}>Email is required</p></div>
-            }
+        <label id='loginLabel' htmlFor="username" style={{ marginTop: "2%" }}>Name</label>
+        <input type="text" placeholder="Name" id="loginInput" name='name' onChange={onChange} />
+        {
+          Error.errors && Error.errors.some(error => error.msg === "name") && <div style={{ height: "7%", marginTop: "1%" }}><p className="error-message" style={{ margin: "0" }}>Name must be alteast 3 characters</p></div>
+        }
 
-            <label id='loginLabel' htmlFor="password" style={{marginTop:"5%"}}>Password</label>
-            <input type="password" placeholder="Password" id="loginInput" name='password' onChange={onChange}/>
-            {
-              Error.errors && Error.errors.some(error => error.msg === "password") && <div style={{height:"7%",marginTop:"1%"}}><p className="error-message" style={{margin:"0"}}>Password must be alteast 5 characters</p></div>
-            }
-            
-            <button id='loginButton' onClick={handleSubmit} style={{marginTop:"6%"}}>Sign Up</button>
-            {/* <div className="social">
+        <label id='loginLabel' htmlFor="username" style={{ marginTop: "5%" }}>Email</label>
+        <input type="text" placeholder="Email" id="loginInput" name='email' onChange={onChange} />
+        {
+          Error.errors && Error.errors.some(error => error.msg === "exist") && <div style={{ height: "7%", marginTop: "1%" }}><p className="error-message" style={{ margin: "0" }}>Email already exists, please <Link to="/login" >Login</Link></p></div>
+        }
+        {
+          Error.errors && Error.errors.some(error => error.msg === "email") && <div style={{ height: "7%", marginTop: "1%" }}><p className="error-message" style={{ margin: "0" }}>Email is required</p></div>
+        }
+
+        <label id='loginLabel' htmlFor="password" style={{ marginTop: "5%" }}>Password</label>
+        <input type="password" placeholder="Password" id="loginInput" name='password' onChange={onChange} />
+        {
+          Error.errors && Error.errors.some(error => error.msg === "password") && <div style={{ height: "7%", marginTop: "1%" }}><p className="error-message" style={{ margin: "0" }}>Password must be alteast 5 characters</p></div>
+        }
+
+        <button id='loginButton' onClick={handleSubmit} style={{ marginTop: "6%" }}>Sign Up</button>
+        {/* <div className="social">
             <div className="go"><i className="fab fa-google"></i>  Google</div>
             <div className="fb"><i className="fab fa-facebook"></i>  Facebook</div>
             </div> */}
-            <div style={{display:"flex",justifyContent:"center",marginTop:"8%",fontSize:"large"}}>
-              <Link to="/" style={{textDecoration:"none"}}>Continue as Guest</Link>
-            </div>
-            <div>
+        <div style={{ display: "flex", justifyContent: "center", marginTop: "8%", fontSize: "large" }}>
+          <Link to="/" style={{ textDecoration: "none" }}>Continue as Guest</Link>
+        </div>
+        <div>
 
-            </div>
-        </form>
+        </div>
+      </form>
     </div>
   )
 }

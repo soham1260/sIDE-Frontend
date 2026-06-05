@@ -28,6 +28,7 @@ export default function Code() {
   const [generateLink, setGenerateLink] = useState(false);
   const [sharedCodeLink, setsharedCodeLink] = useState("");
   const [sharedFileName, setSharedFileName] = useState("");
+  const [isHistoryMode, setIsHistoryMode] = useState(false);
 
   const [Prompt, setPrompt] = useState("");
 
@@ -59,11 +60,13 @@ export default function Code() {
           await fetchCode(id);
         }
         else if (localStorage.getItem("c") && localStorage.getItem("c").length !== 0) {
+          setIsHistoryMode(false)
           setLanguage("c");
           setCode(localStorage.getItem("c"));
           setFileName("main");
         }
         else {
+          setIsHistoryMode(false)
           setLanguage("c");
           setCode(demoprograms["c"]);
           setFileName("main");
@@ -72,6 +75,12 @@ export default function Code() {
       else if (location.pathname.startsWith('/sharedcode')) {
         setSharedCode(true);
         await fetchSharedCode(id);
+      }
+      else if (location.pathname.startsWith('/history')) {
+        setIsHistoryMode(true);
+        if (id) {
+          await fetchHistoryDetail(id);
+        }
       }
 
       if (localStorage.getItem("token")) {
@@ -148,6 +157,34 @@ export default function Code() {
       setFileName(data.name);
     } catch (error) {
       navigate("/notfound")
+    }
+  }
+
+  const fetchHistoryDetail = async (id) => {
+    try {
+      const response = await fetch(process.env.REACT_APP_BACKEND_URL + "fetchhistorydetail?id=" + id, {
+        method: "GET",
+        headers: {
+          'Content-Type': 'application/json',
+          'auth-token': localStorage.getItem('token')
+        },
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error("Error connecting server");
+      }
+      if (data.message) {
+        navigate("/notfound")
+      }
+      setLanguage(data.language);
+      setCode(data.code);
+      setFileName(data.filename);
+      setInput(data.input || "");
+      setAns(data.output || "");
+    } catch (error) {
+      alert("Error connecting server, please try again");
+      navigate("/history");
     }
   }
 
@@ -533,9 +570,9 @@ export default function Code() {
           <div className="row">
             <div className='d-flex col-md-8' style={{ justifyContent: "space-between" }}>
               <div className='d-flex align-items-center'>
-                <button type="button" className={"btn btn-outline-primary btn-sm" + (submit ? "" : " disabled")} style={{ borderRadius: "0" }} onClick={handleSubmit}>Submit</button>
+                <button type="button" className={"btn btn-outline-primary btn-sm" + (submit && !isHistoryMode ? "" : " disabled")} disabled={isHistoryMode} style={{ borderRadius: "0" }} onClick={handleSubmit}>Submit</button>
                 <div className="dropdown" data-bs-theme="dark">
-                  <button className="btn btn-outline-primary btn-sm dropdown-toggle" id="dropdownMenuButtonDark" style={{ borderRadius: "0", width: "100px" }} type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <button className="btn btn-outline-primary btn-sm dropdown-toggle" id="dropdownMenuButtonDark" style={{ borderRadius: "0", width: "100px" }} type="button" data-bs-toggle="dropdown" aria-expanded="false" disabled={isHistoryMode}>
                     {language === "cpp" ? "c++" : language}
                   </button>
                   <ul className="dropdown-menu" aria-labelledby="dropdownMenuButtonDark">
@@ -560,16 +597,16 @@ export default function Code() {
               </div>
 
               <div>
-                <img className="ico" style={{ marginRight: "15px" }} src={reset} width={"20px"} onClick={() => { localStorage.setItem(language, ""); handleLanguageChange(language) }} />
+                <img className="ico" style={{ marginRight: "15px", ...(isHistoryMode ? { pointerEvents: "none", opacity: "0.5" } : {}) }} src={reset} width={"20px"} onClick={() => { localStorage.setItem(language, ""); handleLanguageChange(language) }} />
                 <img className="ico" style={{ marginRight: "15px" }} src={copy} width={"20px"} onClick={() => { navigator.clipboard.writeText(code) }} />
-                <img className="ico" style={{ marginRight: "13px" }} src={share} width={"23px"} data-bs-toggle="modal" data-bs-target="#shareFile" />
+                <img className="ico" style={{ marginRight: "13px", ...(isHistoryMode ? { pointerEvents: "none", opacity: "0.5" } : {}) }} src={share} width={"23px"} data-bs-toggle="modal" data-bs-target="#shareFile" />
                 <img className="ico" style={{ marginRight: "15px" }} src={download} width={"23px"} onClick={handleCodeDownload} />
-                <img className="ico" style={{ marginRight: "40px" }} src={upload} width={"23px"} onClick={() => { document.getElementById('codeInput').click(); }} />
+                <img className="ico" style={{ marginRight: "40px", ...(isHistoryMode ? { pointerEvents: "none", opacity: "0.5" } : {}) }} src={upload} width={"23px"} onClick={() => { document.getElementById('codeInput').click(); }} />
               </div>
             </div>
             <div className='col-md-4'>
-              <input type="text" placeholder='save code' style={{ border: "none", borderBottom: "1px solid white", backgroundColor: "#2c2c2c", outline: "none", color: "white", width: "80%", fontSize: "large" }} value={filename} onChange={(e) => { setFileName(e.target.value) }} />
-              {saving ? <img src={spinner} style={{ marginLeft: "20px", width: "27px" }} /> : <img className="ico" style={{ marginLeft: "20px", ...(isLoggedIn ? {} : { opacity: "0.6" }) }} src={cloud} width={"28px"} onClick={handleCloudSave} />}
+              <input type="text" placeholder='save code' disabled={isHistoryMode} style={{ border: "none", borderBottom: "1px solid white", backgroundColor: "#2c2c2c", outline: "none", color: "white", width: "80%", fontSize: "large" }} value={filename} onChange={(e) => { setFileName(e.target.value) }} />
+              {saving ? <img src={spinner} style={{ marginLeft: "20px", width: "27px" }} /> : <img className="ico" style={{ marginLeft: "20px", ...(isLoggedIn && !isHistoryMode ? {} : { opacity: "0.6", pointerEvents: "none" }) }} src={cloud} width={"28px"} onClick={handleCloudSave} />}
             </div>
           </div>
           <div className="row" style={{ height: "80vh" }}>
@@ -585,12 +622,11 @@ export default function Code() {
                   onChange={handleEditorChange}
                   theme='vs-dark'
                   options={{
+                    readOnly: isHistoryMode,
                     minimap: {
                       enabled: false,
                     },
-                  }
-
-                  }
+                  }}
                 />
               </div>
             </div>
@@ -603,10 +639,10 @@ export default function Code() {
                     <h6 style={{ paddingTop: "3%", paddingLeft: "2%", margin: "0" }}>Input</h6>
                     <div style={{ paddingTop: "2%", width: "60px" }}>
                       <img className='ico' src={copy} style={{ width: "12px" }} onClick={() => { navigator.clipboard.writeText(input) }} />
-                      <img className='ico' src={upload} style={{ width: "15px", marginLeft: "30%" }} onClick={() => { document.getElementById('fileInput').click(); }} />
+                      <img className='ico' src={upload} style={{ width: "15px", marginLeft: "30%", ...(isHistoryMode ? { pointerEvents: "none", opacity: "0.5" } : {}) }} onClick={() => { document.getElementById('fileInput').click(); }} />
                     </div>
                   </div>
-                  <textarea className='px-4' type="text" style={{ width: '100%', height: '78%', border: '0', maxHeight: "100%", padding: "0", outline: "none", backgroundColor: "#2c2c2c", resize: "none", colorScheme: "dark" }} value={input} onChange={handleInputChange} />
+                  <textarea className='px-4' type="text" readOnly={isHistoryMode} style={{ width: '100%', height: '78%', border: '0', maxHeight: "100%", padding: "0", outline: "none", backgroundColor: "#2c2c2c", resize: "none", colorScheme: "dark" }} value={input} onChange={handleInputChange} />
                 </div>
 
                 <div className="row" style={{ height: '47%', border: 'solid white 1px', borderRadius: "20px" }}>

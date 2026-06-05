@@ -132,7 +132,7 @@ export default function History() {
                       </div>
                       <div className='col-md-4' style={{ display: "flex", flexDirection: "row", justifyContent: "space-evenly", alignItems: "center", height: "100%" }}>
                         <button type="button" className="btn btn-outline-light" style={{ width: "100px" }} onClick={() => { handleDownload(code._id, code.filename || "main", code.language) }}>Download</button>
-                        <button type="button" className="btn btn-outline-primary" style={{ width: "100px" }} onClick={() => { navigate(`/code/${code._id}`) }}>Edit</button>
+                        <button type="button" className="btn btn-outline-primary" style={{ width: "100px" }} onClick={() => { navigate(`/history/${code._id}`) }}>View</button>
                         <button type="button" className="btn btn-outline-danger" style={{ width: "100px" }} onClick={() => { handleDelete(code._id) }}>Delete</button>
                       </div>
                       <hr style={{ width: "100%", height: "2px", backgroundColor: "#00aeefcc", margin: "0px", border: "0px" }} />
