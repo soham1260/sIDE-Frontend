@@ -19,7 +19,7 @@ export default function Navbar() {
     if (confirmUpdate) {
       localStorage.clear();
       setIsLoggedIn(false);
-      if (location.pathname === '/mycodes') {
+      if (location.pathname === '/mycodes' || location.pathname === '/history') {
         navigate('/code');
       }
     }
@@ -44,6 +44,9 @@ export default function Navbar() {
               </li>
               <li className="nav-item">
                 <Link className={`nav-link ${!isLoggedIn && "disabled"}`} aria-disabled={!isLoggedIn}  to="/mycodes">My codes</Link>
+              </li>
+              <li className="nav-item">
+                <Link className={`nav-link ${!isLoggedIn && "disabled"}`} aria-disabled={!isLoggedIn}  to="/history">History</Link>
               </li>
               <li className="nav-item">
                 <Link className="nav-link" to="/about">About</Link>
