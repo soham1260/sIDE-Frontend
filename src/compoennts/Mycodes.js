@@ -1,16 +1,16 @@
-import React,{useState,useEffect} from 'react'
+import React, { useState, useEffect } from 'react'
 import spinner from '../assets/spinner.gif'
 import { useNavigate } from 'react-router-dom';
 export default function Mycodes() {
-    
-  const [loading,setLoading] = useState(true);
+
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  
-  const [data,setData] = useState()
+
+  const [data, setData] = useState()
 
   const fetchUserData = async () => {
     try {
-      const response = await fetch(process.env.REACT_APP_BACKEND_URL+"fetchuserdata", {
+      const response = await fetch(process.env.REACT_APP_BACKEND_URL + "fetchuserdata", {
         method: "GET",
         headers: {
           'Content-Type': 'application/json',
@@ -19,7 +19,7 @@ export default function Mycodes() {
       });
 
       const data = await response.json();
-      if(!response.ok){
+      if (!response.ok) {
         throw new Error("Error connecting server")
       }
       setData(data);
@@ -32,15 +32,15 @@ export default function Mycodes() {
 
   useEffect(() => {
     const fetchData = async () => {
-        if (localStorage.getItem("token")) {
-            setLoading(true);
-            await fetchUserData();
-            console.log(data);
-            setLoading(false);
-        }
-        else{
-          navigate('/code')
-        }
+      if (localStorage.getItem("token")) {
+        setLoading(true);
+        await fetchUserData();
+        console.log(data);
+        setLoading(false);
+      }
+      else {
+        navigate('/code')
+      }
     };
 
     fetchData();
@@ -48,7 +48,7 @@ export default function Mycodes() {
 
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(process.env.REACT_APP_BACKEND_URL+"deletecode?id=${id}", {
+      const response = await fetch(process.env.REACT_APP_BACKEND_URL + `deletecode?id=${id}`, {
         method: "GET",
         headers: {
           'Content-Type': 'application/json',
@@ -57,7 +57,7 @@ export default function Mycodes() {
       });
 
       const data = await response.json();
-      if(!response.ok){
+      if (!response.ok) {
         throw new Error("Error connecting server")
       }
       setData(data);
@@ -67,60 +67,78 @@ export default function Mycodes() {
     }
   }
 
-  const handleDownload = (code,filename,language) => {
-      const blob = new Blob([code], { type: 'text/plain' });
+  const handleDownload = async (id, filename, language) => {
+    try {
+      const response = await fetch(process.env.REACT_APP_BACKEND_URL + "fetchcode?id=" + id, {
+        method: "GET",
+        headers: {
+          'Content-Type': 'application/json',
+          'auth-token': localStorage.getItem('token')
+        }
+      });
+
+      const data = await response.json();
+      if (!response.ok || data.message) {
+        throw new Error(data.message || "Error fetching code");
+      }
+
+      const blob = new Blob([data.code], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       let ext;
-      switch(language) {
+      switch (language) {
         case "c":
-          ext=".c"
+          ext = ".c"
           break;
         case "cpp":
-          ext=".cpp"
+          ext = ".cpp"
           break;
         case "python":
-          ext=".py"
+          ext = ".py"
           break;
         case "java":
-          ext=".java"
+          ext = ".java"
           break;
-          case "javascript":
-          ext=".js"
+        case "javascript":
+          ext = ".js"
           break;
         default:
-          ext=".txt"
+          ext = ".txt"
       }
       a.href = url;
-      a.download = filename+ext;
+      a.download = filename + ext;
       a.click();
       URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading code:", error);
+      alert("Error downloading code, please try again")
+    }
   };
 
   return (
     <div>
       {
-        loading ? <div className='spinner' style={{display: "flex", justifyContent:"center"}}><img src={spinner}/></div> :
-        <div className='container'>
-            <h1 style={{color: "white", paddingTop: "2%"}}>My Codes</h1>
+        loading ? <div className='spinner' style={{ display: "flex", justifyContent: "center" }}><img src={spinner} /></div> :
+          <div className='container'>
+            <h1 style={{ color: "white", paddingTop: "2%" }}>My Codes</h1>
             {
-                data && data.codes.map((code) => {
-                    return (
-                        <div className='row' key={code._id} style={{color: "white",margin:"0",marginTop:"0", height:"12vh"}}>
-                            <div className='col-md-8' style={{display: "flex", flexDirection: "row", alignItems:"center", height: "100%"}}>
-                                <h5 style={{margin:"0"}}>{code.filename}.{code.language === "python" ? "py" : (code.language === "javascript" ? "js" : code.language)}</h5>
-                            </div>
-                            <div className='col-md-4' style={{display: "flex", flexDirection: "row", justifyContent: "space-evenly",alignItems:"center", height: "100%"}}>
-                                <button type="button" className="btn btn-outline-light" style={{width:"100px"}} onClick={() => {handleDownload(code.code,code.filename,code.language)}}>Download</button>
-                                <button type="button" className="btn btn-outline-primary" style={{width:"100px"}} onClick={() => {navigate(`/code/${code._id}`)}}>Edit</button>
-                                <button type="button" className="btn btn-outline-danger" style={{width:"100px"}} onClick={() => {handleDelete(code._id)}}>Delete</button>
-                            </div>
-                            <hr style={{ width: "100%", height: "2px", backgroundColor: "#00aeefcc", margin: "0px" , border: "0px"}} />
-                        </div>
-                    );
-                })
+              data && data.codes.map((code) => {
+                return (
+                  <div className='row' key={code._id} style={{ color: "white", margin: "0", marginTop: "0", height: "12vh" }}>
+                    <div className='col-md-8' style={{ display: "flex", flexDirection: "row", alignItems: "center", height: "100%" }}>
+                      <h5 style={{ margin: "0" }}>{code.filename}.{code.language === "python" ? "py" : (code.language === "javascript" ? "js" : code.language)}</h5>
+                    </div>
+                    <div className='col-md-4' style={{ display: "flex", flexDirection: "row", justifyContent: "space-evenly", alignItems: "center", height: "100%" }}>
+                      <button type="button" className="btn btn-outline-light" style={{ width: "100px" }} onClick={() => { handleDownload(code._id, code.filename, code.language) }}>Download</button>
+                      <button type="button" className="btn btn-outline-primary" style={{ width: "100px" }} onClick={() => { navigate(`/code/${code._id}`) }}>Edit</button>
+                      <button type="button" className="btn btn-outline-danger" style={{ width: "100px" }} onClick={() => { handleDelete(code._id) }}>Delete</button>
+                    </div>
+                    <hr style={{ width: "100%", height: "2px", backgroundColor: "#00aeefcc", margin: "0px", border: "0px" }} />
+                  </div>
+                );
+              })
             }
-        </div>
+          </div>
       }
     </div>
   )

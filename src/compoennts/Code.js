@@ -1,4 +1,4 @@
-import React, { useState,useEffect,useContext,useRef } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import Editor from '@monaco-editor/react';
 import copy from '../assets/copy.svg'
 import upload from '../assets/upload.svg'
@@ -10,7 +10,7 @@ import spinner from '../assets/spinner.gif'
 import demoprograms from '../data/demoprograms';
 import languageinfo from '../data/languageinfo';
 import { state } from './state/State'
-import {useParams, useNavigate, useLocation} from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { marked } from "marked";
 
 export default function Code() {
@@ -20,22 +20,22 @@ export default function Code() {
   const [input, setInput] = useState("");
   const [language, setLanguage] = useState("c");
   const [filename, setFileName] = useState("");
-  const [loading,setLoading] = useState(true);
-  const [outputloading,setOutputLoading] = useState(false);
-  const [saving,setSaving] = useState(false);
-  const [submit,setSubmit] = useState(true);
-  const [sharedCode,setSharedCode] = useState(false);
-  const [generateLink,setGenerateLink] = useState(false);
-  const [sharedCodeLink,setsharedCodeLink] = useState("");
-  const [sharedFileName,setSharedFileName] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [outputloading, setOutputLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [submit, setSubmit] = useState(true);
+  const [sharedCode, setSharedCode] = useState(false);
+  const [generateLink, setGenerateLink] = useState(false);
+  const [sharedCodeLink, setsharedCodeLink] = useState("");
+  const [sharedFileName, setSharedFileName] = useState("");
 
-  const [Prompt,setPrompt] = useState("");
-  
-  const [Response,setResponse] = useState("");
+  const [Prompt, setPrompt] = useState("");
+
+  const [Response, setResponse] = useState("");
 
   const timeouts = useRef([]);
 
-  const [Generating,setGenerating] = useState(false);
+  const [Generating, setGenerating] = useState(false);
 
   const GeneratingRef = useRef(false);
 
@@ -44,7 +44,7 @@ export default function Code() {
   }, [Generating]);
 
   const context = useContext(state);
-  const { isLoggedIn,setIsLoggedIn } = context;
+  const { isLoggedIn, setIsLoggedIn } = context;
   const navigate = useNavigate();
   const { id } = useParams();
   const location = useLocation();
@@ -55,12 +55,10 @@ export default function Code() {
     const loadContent = async () => {
 
       if (location.pathname.startsWith('/code')) {
-        if(id)
-        {
+        if (id) {
           await fetchCode(id);
         }
-        else if(localStorage.getItem("c") && localStorage.getItem("c").length !== 0)
-        {
+        else if (localStorage.getItem("c") && localStorage.getItem("c").length !== 0) {
           setLanguage("c");
           setCode(localStorage.getItem("c"));
           setFileName("main");
@@ -71,13 +69,12 @@ export default function Code() {
           setFileName("main");
         }
       }
-      else if(location.pathname.startsWith('/sharedcode'))
-      {
+      else if (location.pathname.startsWith('/sharedcode')) {
         setSharedCode(true);
         await fetchSharedCode(id);
       }
-  
-      if (localStorage.getItem("token")){
+
+      if (localStorage.getItem("token")) {
         setIsLoggedIn(true);
       }
     }
@@ -104,22 +101,22 @@ export default function Code() {
       }
     };
   }, []);
-  
+
   const fetchCode = async (id) => {
     try {
-      const response = await fetch(process.env.REACT_APP_BACKEND_URL+"fetchcode?id="+id, {
+      const response = await fetch(process.env.REACT_APP_BACKEND_URL + "fetchcode?id=" + id, {
         method: "GET",
         headers: {
           'Content-Type': 'application/json',
           'auth-token': localStorage.getItem('token')
         },
       });
-      
+
       const data = await response.json();
-      if(!response.ok){
+      if (!response.ok) {
         throw new Error("Error connecting server");
       }
-      if(data.message){
+      if (data.message) {
         navigate("/notfound")
       }
       setLanguage(data.language);
@@ -135,15 +132,15 @@ export default function Code() {
 
   const fetchSharedCode = async (id) => {
     try {
-      const response = await fetch(process.env.REACT_APP_BACKEND_URL+"sharedcode/"+id, {
+      const response = await fetch(process.env.REACT_APP_BACKEND_URL + "sharedcode/" + id, {
         method: "GET",
         headers: {
           'Content-Type': 'application/json'
         },
       });
-      
+
       const data = await response.json();
-      if(!response.ok){
+      if (!response.ok) {
         navigate("/notfound");
       }
       setLanguage(data.language);
@@ -158,17 +155,17 @@ export default function Code() {
     setSubmit(false);
     setOutputLoading(true);
     try {
-      const response = await fetch(process.env.REACT_APP_BACKEND_URL+"submitcode", {
+      const response = await fetch(process.env.REACT_APP_BACKEND_URL + "submitcode", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
           'auth-token': localStorage.getItem('token')
         },
-        body: JSON.stringify({ code,input,language,filename })
+        body: JSON.stringify({ code, input, language, filename })
       });
 
       const data = await response.json();
-      if(!response.ok){
+      if (!response.ok) {
         throw new Error("Error connecting server")
       }
       setAns(data.ans)
@@ -180,7 +177,7 @@ export default function Code() {
     setSubmit(true);
   };
 
-  
+
   const handleEditorChange = (value, event) => {
     setCode(value);
     localStorage.setItem(language, value);
@@ -190,7 +187,7 @@ export default function Code() {
   const handleInputChange = (e) => {
     setInput(e.target.value);
   };
-  
+
 
   const handleInputUpload = (event) => {
     const selectedFile = event.target.files[0];
@@ -202,12 +199,12 @@ export default function Code() {
         setInput(content);
       };
     }
-    event.target.value=null;
+    event.target.value = null;
   };
 
   const handleCodeUpload = (event) => {
     const confirmUpdate = window.confirm(`The code will get overwritten. Please copy or download the code. Click OK to proceed.`);
-    if(confirmUpdate){
+    if (confirmUpdate) {
       const selectedFile = event.target.files[0];
       if (selectedFile) {
         const fileNameWithExtension = selectedFile.name;
@@ -220,7 +217,7 @@ export default function Code() {
           setCode(content);
         };
       }
-      event.target.value=null;
+      event.target.value = null;
     }
   };
 
@@ -229,27 +226,27 @@ export default function Code() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     let ext;
-    switch(language) {
+    switch (language) {
       case "c":
-        ext=".c"
+        ext = ".c"
         break;
       case "cpp":
-        ext=".cpp"
+        ext = ".cpp"
         break;
       case "python":
-        ext=".py"
+        ext = ".py"
         break;
       case "java":
-        ext=".java"
+        ext = ".java"
         break;
       case "javascript":
-        ext=".js"
+        ext = ".js"
         break;
       default:
-        ext=".txt"
+        ext = ".txt"
     }
     a.href = url;
-    a.download = filename+ext;
+    a.download = filename + ext;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -267,7 +264,7 @@ export default function Code() {
   const checkFile = async () => {
 
     try {
-      const response = await fetch(process.env.REACT_APP_BACKEND_URL+"checkfileexists", {
+      const response = await fetch(process.env.REACT_APP_BACKEND_URL + "checkfileexists", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -275,22 +272,22 @@ export default function Code() {
         },
         body: JSON.stringify({ language, filename })
       });
-  
+
       const data = await response.json();
-  
+
       if (!response.ok) {
         throw new Error(data.message || "Error connecting to server");
       }
-  
+
       return data;
     } catch (error) {
       throw new Error(error.message || "Error connecting to server");
     }
   }
-  
-  const saveFile = async() => {
+
+  const saveFile = async () => {
     try {
-      const response = await fetch(process.env.REACT_APP_BACKEND_URL+"savefile", {
+      const response = await fetch(process.env.REACT_APP_BACKEND_URL + "savefile", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -298,13 +295,13 @@ export default function Code() {
         },
         body: JSON.stringify({ language, filename, code })
       });
-  
+
       const data = await response.json();
-  
+
       if (!response.ok) {
         throw new Error(data.message || "Error connecting to server");
       }
-  
+
       return data;
     } catch (error) {
       throw new Error(error.message || "Error connecting to server");
@@ -313,59 +310,58 @@ export default function Code() {
 
   const handleCloudSave = async () => {
     setSaving(true);
-    if(isLoggedIn)
-      {
-        try {
-          const response = await checkFile()
-          if(response.exists) {
-            const confirmUpdate = window.confirm(`File ${filename}.${language} already exists. Do you want to update it?`);
-            if (confirmUpdate) {
-              await saveFile();
-            }
-          }
-          else {
+    if (isLoggedIn) {
+      try {
+        const response = await checkFile()
+        if (response.exists) {
+          const confirmUpdate = window.confirm(`File ${filename}.${language} already exists. Do you want to update it?`);
+          if (confirmUpdate) {
             await saveFile();
           }
-        } catch (error) {
-          alert("Error connecting server, please try again");
         }
+        else {
+          await saveFile();
+        }
+      } catch (error) {
+        alert("Error connecting server, please try again");
       }
-      setSaving(false);
+    }
+    setSaving(false);
   }
 
   function handleLanguageChange(language) {
-    
-      setLanguage(language);
-      if(localStorage.getItem(language) && localStorage.getItem(language).length!=0){
-        setCode(localStorage.getItem(language));
-      }
-      else{
-        setCode(demoprograms[language])
-      }
-      setAns("");
-      setFileName("main");
-    
+
+    setLanguage(language);
+    if (localStorage.getItem(language) && localStorage.getItem(language).length != 0) {
+      setCode(localStorage.getItem(language));
+    }
+    else {
+      setCode(demoprograms[language])
+    }
+    setAns("");
+    setFileName("main");
+
   }
 
   const genLink = async () => {
     setGenerateLink(true);
     let name = sharedFileName.length === 0 ? filename : sharedFileName;
     try {
-      const response = await fetch(process.env.REACT_APP_BACKEND_URL+"sharecode", {
+      const response = await fetch(process.env.REACT_APP_BACKEND_URL + "sharecode", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ language, code, name})
+        body: JSON.stringify({ language, code, name })
       });
-  
+
       const data = await response.json();
-  
+
       if (!response.ok) {
         throw new Error(data.message || "Error connecting to server");
       }
-      
-      setsharedCodeLink("https://side-28r4.onrender.com/sharedcode/"+data.urlid);
+
+      setsharedCodeLink("https://side-28r4.onrender.com/sharedcode/" + data.urlid);
     } catch (error) {
       throw new Error(error.message || "Error connecting to server");
     }
@@ -373,14 +369,14 @@ export default function Code() {
 
   const syncCode = async () => {
     try {
-      const response = await fetch(process.env.REACT_APP_BACKEND_URL+"synccode", {
+      const response = await fetch(process.env.REACT_APP_BACKEND_URL + "synccode", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ language, code, id})
+        body: JSON.stringify({ language, code, id })
       });
-  
+
       if (!response.ok) {
         navigate("/notfound");
       }
@@ -388,15 +384,15 @@ export default function Code() {
       throw new Error(error.message || "Error connecting to server");
     }
   }
-  
+
   const onPromptChange = (e) => {
-      setPrompt(e.target.value)
-    };
-  
-  const handlePrompt = async() => {
+    setPrompt(e.target.value)
+  };
+
+  const handlePrompt = async () => {
     setResponse("");
     setGenerating(true);
-    fetch(process.env.REACT_APP_BACKEND_URL+"ai",{
+    fetch(process.env.REACT_APP_BACKEND_URL + "ai", {
       method: 'Post',
       headers: {
         'Content-Type': 'application/json',
@@ -408,26 +404,26 @@ export default function Code() {
         language: language
       })
     })
-    .then(res => res.json())
-    .then(data => {
-      if (!GeneratingRef.current) {
-        // If stopped before response arrived, do nothing here
-        return;
-      }
-      timeouts.current.forEach(clearTimeout);
-      timeouts.current = [];
-      const fullText = marked(data.response ? data.response : "Please Enter the message!");
-      for (let i = 0; i < fullText.length; i++) {
-        const timeout = setTimeout(() => {
-          setResponse(prev => prev + fullText.charAt(i));
-        }, i * 10);
-        timeouts.current.push(timeout);
-      }
-      const finalTimeout = setTimeout(() => {
-        setGenerating(false);
-      }, fullText.length * 10);
-      timeouts.current.push(finalTimeout);
-    });
+      .then(res => res.json())
+      .then(data => {
+        if (!GeneratingRef.current) {
+          // If stopped before response arrived, do nothing here
+          return;
+        }
+        timeouts.current.forEach(clearTimeout);
+        timeouts.current = [];
+        const fullText = marked(data.response ? data.response : "Please Enter the message!");
+        for (let i = 0; i < fullText.length; i++) {
+          const timeout = setTimeout(() => {
+            setResponse(prev => prev + fullText.charAt(i));
+          }, i * 10);
+          timeouts.current.push(timeout);
+        }
+        const finalTimeout = setTimeout(() => {
+          setGenerating(false);
+        }, fullText.length * 10);
+        timeouts.current.push(finalTimeout);
+      });
   }
 
   const handleCopy = (append) => {
@@ -437,8 +433,8 @@ export default function Code() {
 
     const extracted = codeElement ? codeElement.textContent : null;
 
-    if(append) {
-      setCode(code+extracted);
+    if (append) {
+      setCode(code + extracted);
     }
     else {
       setCode(extracted);
@@ -446,19 +442,19 @@ export default function Code() {
   }
 
   return (
-    <div style={{paddingTop: "1%"}}>
+    <div style={{ paddingTop: "1%" }}>
 
       <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content" style={{backgroundColor: "#2c2c2c",color:"white",borderColor:"white"}}>
-            <div className="modal-body" dangerouslySetInnerHTML={{ __html: languageinfo[language] }}/>
+          <div className="modal-content" style={{ backgroundColor: "#2c2c2c", color: "white", borderColor: "white" }}>
+            <div className="modal-body" dangerouslySetInnerHTML={{ __html: languageinfo[language] }} />
           </div>
         </div>
       </div>
-      
+
       <div className="modal fade" id="AIModal" tabIndex="-1" aria-labelledby="AIModalLabel" aria-hidden="true">
-        <div className="modal-dialog" style={{width:"850px", maxWidth:"90%"}}>
-          <div className="modal-content" style={{backgroundColor: "#2c2c2c",color:"white",borderColor:"white"}}>
+        <div className="modal-dialog" style={{ width: "850px", maxWidth: "90%" }}>
+          <div className="modal-content" style={{ backgroundColor: "#2c2c2c", color: "white", borderColor: "white" }}>
             <div className="modal-header">
               <h5 className="modal-title" id="AIModalLabel">Need help with code? Ask right away!</h5>
               <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -472,19 +468,19 @@ export default function Code() {
                 value={Prompt}
                 onChange={onPromptChange}
               />
-              <div dangerouslySetInnerHTML={{ __html: Response }} style={{marginTop:"15px"}}/>
+              <div dangerouslySetInnerHTML={{ __html: Response }} style={{ marginTop: "15px" }} />
             </div>
             <div className="modal-footer">
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" checked={checked} onChange={() => setChecked(!checked)} style={{transform: "scale(1.2)",marginRight:"5px"}}/>
+                <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" checked={checked} onChange={() => setChecked(!checked)} style={{ transform: "scale(1.2)", marginRight: "5px" }} />
                 <label class="form-check-label" for="flexCheckDefault">
                   Include code with query
                 </label>
               </div>
-              <button type="button" className="btn abtn" onClick={() => {handleCopy(true)}}>
+              <button type="button" className="btn abtn" onClick={() => { handleCopy(true) }}>
                 Append to code
               </button>
-              <button type="button" className="btn abtn" onClick={() => {handleCopy(false)}}>
+              <button type="button" className="btn abtn" onClick={() => { handleCopy(false) }}>
                 Overwrite on code
               </button>
               <button type="button" className="btn abtn" onClick={() => navigator.clipboard.writeText(Response)}>
@@ -494,13 +490,13 @@ export default function Code() {
                 type="button"
                 className="btn sbtn"
                 // data-dismiss="modal"
-                onClick={() => {timeouts.current.forEach(clearTimeout);timeouts.current = [];setGenerating(false);}}
+                onClick={() => { timeouts.current.forEach(clearTimeout); timeouts.current = []; setGenerating(false); }}
               >
                 Stop
               </button>) :
-              (<button type="button" className="btn abtn" onClick={handlePrompt}>
-                Ask
-              </button>)}
+                (<button type="button" className="btn abtn" onClick={handlePrompt}>
+                  Ask
+                </button>)}
             </div>
           </div>
         </div>
@@ -508,84 +504,84 @@ export default function Code() {
 
       <div className="modal fade" id="shareFile" tabIndex="-1" aria-labelledby="shareFile" aria-hidden="true" ref={modalRef}>
         <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content" style={{backgroundColor: "#2c2c2c",color:"white",borderColor:"white"}}>
+          <div className="modal-content" style={{ backgroundColor: "#2c2c2c", color: "white", borderColor: "white" }}>
             <div className="modal-body">
-              <h3 style={{display:"flex",justifyContent:"center"}}>Share Code</h3>
+              <h3 style={{ display: "flex", justifyContent: "center" }}>Share Code</h3>
               <h5>File Name</h5>
-              <input type="text" placeholder='Enter File Name' value={sharedFileName} onChange={(e) => {setSharedFileName(e.target.value)}} style={{border: "none", border: "1px solid white",backgroundColor: "#2c2c2c", outline: "none",color:"white",width:"100%",padding:"5px",paddingLeft:"10px",fontSize: "large",borderRadius:"5px",marginBottom:"15px"}}/>
-              {!generateLink ? 
-                  <button type="button" className="btn btn-outline-primary" style={{marginBottom:"15px"}} onClick={genLink}>Generate Link</button>
+              <input type="text" placeholder='Enter File Name' value={sharedFileName} onChange={(e) => { setSharedFileName(e.target.value) }} style={{ border: "none", border: "1px solid white", backgroundColor: "#2c2c2c", outline: "none", color: "white", width: "100%", padding: "5px", paddingLeft: "10px", fontSize: "large", borderRadius: "5px", marginBottom: "15px" }} />
+              {!generateLink ?
+                <button type="button" className="btn btn-outline-primary" style={{ marginBottom: "15px" }} onClick={genLink}>Generate Link</button>
                 :
-                (sharedCodeLink.length ===0 ? 
-                  <img src={spinner} width={"80px"}/>
-                  : <div style={{display:"flex",flexDirection:"column"}}>
-                    <div style={{display:"flex"}}>
-                      <input type="text" disabled placeholder='Link' value={sharedCodeLink} style={{border: "none", border: "1px solid white",backgroundColor: "#2c2c2c", outline: "none",color:"white",width:"100%",padding:"5px",paddingLeft:"10px",fontSize: "large",borderRadius:"5px"}}/>
-                      <img className="ico" style={{marginLeft: "15px"}} src={copy} width={"20px"} onClick={() => {navigator.clipboard.writeText(sharedCodeLink)}}/>
+                (sharedCodeLink.length === 0 ?
+                  <img src={spinner} width={"80px"} />
+                  : <div style={{ display: "flex", flexDirection: "column" }}>
+                    <div style={{ display: "flex" }}>
+                      <input type="text" disabled placeholder='Link' value={sharedCodeLink} style={{ border: "none", border: "1px solid white", backgroundColor: "#2c2c2c", outline: "none", color: "white", width: "100%", padding: "5px", paddingLeft: "10px", fontSize: "large", borderRadius: "5px" }} />
+                      <img className="ico" style={{ marginLeft: "15px" }} src={copy} width={"20px"} onClick={() => { navigator.clipboard.writeText(sharedCodeLink) }} />
                     </div>
-                    <div style={{paddingTop:"15px"}}>
-                      The link is valid only for 24 hours. <br/><p>The link is bound to a copy of this code. Modifying the code accessible by the link won't alter this code.</p>
+                    <div style={{ paddingTop: "15px" }}>
+                      The link is valid only for 24 hours. <br /><p>The link is bound to a copy of this code. Modifying the code accessible by the link won't alter this code.</p>
                     </div>
-                </div>)}
+                  </div>)}
             </div>
           </div>
         </div>
       </div>
 
-      {loading ? <div className='spinner' style={{display: "flex", justifyContent:"center"}}><img src={spinner}/></div> :
-      <div>
-        <div className="row">
-          <div className='d-flex col-md-8' style={{justifyContent: "space-between"}}>
-            <div className='d-flex align-items-center'>
-              <button type="button" className={"btn btn-outline-primary btn-sm" + (submit ? "" : " disabled")} style={{borderRadius: "0"}} onClick={handleSubmit}>Submit</button>
-              <div className="dropdown" data-bs-theme="dark">
-                <button className="btn btn-outline-primary btn-sm dropdown-toggle" id="dropdownMenuButtonDark" style={{borderRadius: "0",width:"100px"}} type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  {language==="cpp" ? "c++" : language}
+      {loading ? <div className='spinner' style={{ display: "flex", justifyContent: "center" }}><img src={spinner} /></div> :
+        <div>
+          <div className="row">
+            <div className='d-flex col-md-8' style={{ justifyContent: "space-between" }}>
+              <div className='d-flex align-items-center'>
+                <button type="button" className={"btn btn-outline-primary btn-sm" + (submit ? "" : " disabled")} style={{ borderRadius: "0" }} onClick={handleSubmit}>Submit</button>
+                <div className="dropdown" data-bs-theme="dark">
+                  <button className="btn btn-outline-primary btn-sm dropdown-toggle" id="dropdownMenuButtonDark" style={{ borderRadius: "0", width: "100px" }} type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    {language === "cpp" ? "c++" : language}
+                  </button>
+                  <ul className="dropdown-menu" aria-labelledby="dropdownMenuButtonDark">
+                    <li><a className="dropdown-item" onClick={() => { handleLanguageChange("c") }}>c</a></li>
+                    <li><a className="dropdown-item" onClick={() => { handleLanguageChange("cpp") }}>c++</a></li>
+                    <li><a className="dropdown-item" onClick={() => { handleLanguageChange("java"); }}>Java</a></li>
+                    <li><a className="dropdown-item" onClick={() => { handleLanguageChange("python") }}>Python</a></li>
+                    <li><a className="dropdown-item" onClick={() => { handleLanguageChange("javascript") }}>Javascript</a></li>
+                  </ul>
+                </div>
+                <button type="button" className="btn btn-outline-primary btn-sm" style={{ borderRadius: "0" }} data-bs-toggle="modal" data-bs-target="#exampleModal">ⓘ</button>
+                <button type="button" className="btn btn-outline-primary btn-sm" style={{ borderRadius: "0", textWrap: "nowrap" }} data-bs-toggle="modal" data-bs-target="#AIModal">
+                  Ask AI
                 </button>
-                <ul className="dropdown-menu" aria-labelledby="dropdownMenuButtonDark">
-                  <li><a className="dropdown-item" onClick={() => {handleLanguageChange("c")}}>c</a></li>
-                  <li><a className="dropdown-item" onClick={() => {handleLanguageChange("cpp")}}>c++</a></li>
-                  <li><a className="dropdown-item" onClick={() => {handleLanguageChange("java");}}>Java</a></li>
-                  <li><a className="dropdown-item" onClick={() => {handleLanguageChange("python")}}>Python</a></li>
-                  <li><a className="dropdown-item" onClick={() => {handleLanguageChange("javascript")}}>Javascript</a></li>
-                </ul>
+                {sharedCode && <button type="button" className="btn btn-outline-primary btn-sm" style={{ borderRadius: "0" }} onClick={syncCode}>Sync</button>}
+                {
+                  language === 'java' && <input type="text" style={{ border: "1px solid #0D6EFD", backgroundColor: "#2c2c2c", outline: "none", color: "white", width: "80%", fontSize: "large", paddingLeft: "1%" }} value={filename} onChange={(e) => { setFileName(e.target.value) }} />
+                }
+                {
+                  language === 'java' && <p style={{ padding: "0", margin: "0", fontSize: "large", color: "white", marginLeft: "1%" }}>.java</p>
+                }
               </div>
-              <button type="button" className="btn btn-outline-primary btn-sm" style={{borderRadius: "0"}} data-bs-toggle="modal" data-bs-target="#exampleModal">ⓘ</button>
-              <button type="button" className="btn btn-outline-primary btn-sm" style={{borderRadius: "0",textWrap:"nowrap"}} data-bs-toggle="modal" data-bs-target="#AIModal">
-                Ask AI
-              </button>
-              {sharedCode && <button type="button" className="btn btn-outline-primary btn-sm" style={{borderRadius: "0"}} onClick={syncCode}>Sync</button>}
-              {
-                language==='java' && <input type="text" style={{border: "1px solid #0D6EFD",backgroundColor: "#2c2c2c", outline: "none",color:"white",width:"80%",fontSize: "large",paddingLeft:"1%"}} value={filename} onChange={(e) => {setFileName(e.target.value)}}/>
-              }
-              {
-                language==='java' && <p style={{padding:"0",margin:"0",fontSize:"large",color:"white",marginLeft:"1%"}}>.java</p>
-              }
-            </div>
-            
-            <div>
-              <img className="ico" style={{marginRight: "15px"}} src={reset} width={"20px"} onClick={() => {localStorage.setItem(language, "");handleLanguageChange(language)}}/>
-              <img className="ico" style={{marginRight: "15px"}} src={copy} width={"20px"} onClick={() => {navigator.clipboard.writeText(code)}}/>
-              <img className="ico" style={{marginRight: "13px"}} src={share} width={"23px"} data-bs-toggle="modal" data-bs-target="#shareFile"/>
-              <img className="ico" style={{marginRight: "15px"}} src={download} width={"23px"} onClick={handleCodeDownload}/>
-              <img className="ico" style={{marginRight: "40px"}} src={upload} width={"23px"} onClick={() => {document.getElementById('codeInput').click();}}/>
-            </div>
-          </div>
-          <div className='col-md-4'>
-            <input type="text" placeholder='save code' style={{border: "none", borderBottom: "1px solid white",backgroundColor: "#2c2c2c", outline: "none",color:"white",width:"80%",fontSize: "large"}} value={filename} onChange={(e) => {setFileName(e.target.value)}}/>
-            {saving ? <img src={spinner} style={{marginLeft:"20px",width:"27px"}}/> : <img className="ico" style={{marginLeft: "20px",...(isLoggedIn ? {} : { opacity: "0.6" })}} src={cloud} width={"28px"} onClick={handleCloudSave}/>}
-          </div>
-        </div>
-        <div className="row" style={{height: "80vh"}}>
-            <div className="col-md-8" style={{padding: "0"}}>
-              
+
               <div>
-                <Editor 
+                <img className="ico" style={{ marginRight: "15px" }} src={reset} width={"20px"} onClick={() => { localStorage.setItem(language, ""); handleLanguageChange(language) }} />
+                <img className="ico" style={{ marginRight: "15px" }} src={copy} width={"20px"} onClick={() => { navigator.clipboard.writeText(code) }} />
+                <img className="ico" style={{ marginRight: "13px" }} src={share} width={"23px"} data-bs-toggle="modal" data-bs-target="#shareFile" />
+                <img className="ico" style={{ marginRight: "15px" }} src={download} width={"23px"} onClick={handleCodeDownload} />
+                <img className="ico" style={{ marginRight: "40px" }} src={upload} width={"23px"} onClick={() => { document.getElementById('codeInput').click(); }} />
+              </div>
+            </div>
+            <div className='col-md-4'>
+              <input type="text" placeholder='save code' style={{ border: "none", borderBottom: "1px solid white", backgroundColor: "#2c2c2c", outline: "none", color: "white", width: "80%", fontSize: "large" }} value={filename} onChange={(e) => { setFileName(e.target.value) }} />
+              {saving ? <img src={spinner} style={{ marginLeft: "20px", width: "27px" }} /> : <img className="ico" style={{ marginLeft: "20px", ...(isLoggedIn ? {} : { opacity: "0.6" }) }} src={cloud} width={"28px"} onClick={handleCloudSave} />}
+            </div>
+          </div>
+          <div className="row" style={{ height: "80vh" }}>
+            <div className="col-md-8" style={{ padding: "0" }}>
+
+              <div>
+                <Editor
                   width="97%"
                   height="83vh"
-                  language={language} 
+                  language={language}
                   defaultValue={""}
-                  value={code} 
+                  value={code}
                   onChange={handleEditorChange}
                   theme='vs-dark'
                   options={{
@@ -599,36 +595,36 @@ export default function Code() {
               </div>
             </div>
 
-            <div className="col-md-4" style={{height: "83vh", paddingRight: "3%",paddingLeft:"0"}}>
-              <div style={{display: "flex", flexDirection: "column", justifyContent: "space-evenly", height: "100%"}}>
+            <div className="col-md-4" style={{ height: "83vh", paddingRight: "3%", paddingLeft: "0" }}>
+              <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-evenly", height: "100%" }}>
 
-                <div className="row" style={{ height: '47%',border:'solid white 1px',borderRadius: "20px" }}>
-                  <div style={{color:"white",backgroundColor:"#3d3d3d",borderRadius: "20px 20px 0px 0px",display:"flex",justifyContent:"space-between"}}>
-                    <h6 style={{paddingTop: "3%",paddingLeft:"2%", margin: "0"}}>Input</h6>
-                    <div style={{paddingTop:"2%",width:"60px"}}>
-                      <img className='ico' src={copy} style={{width: "12px"}} onClick={() => {navigator.clipboard.writeText(input)}}/>
-                      <img className='ico' src={upload} style={{width: "15px",marginLeft: "30%"}} onClick={() => {document.getElementById('fileInput').click();}}/>
+                <div className="row" style={{ height: '47%', border: 'solid white 1px', borderRadius: "20px" }}>
+                  <div style={{ color: "white", backgroundColor: "#3d3d3d", borderRadius: "20px 20px 0px 0px", display: "flex", justifyContent: "space-between" }}>
+                    <h6 style={{ paddingTop: "3%", paddingLeft: "2%", margin: "0" }}>Input</h6>
+                    <div style={{ paddingTop: "2%", width: "60px" }}>
+                      <img className='ico' src={copy} style={{ width: "12px" }} onClick={() => { navigator.clipboard.writeText(input) }} />
+                      <img className='ico' src={upload} style={{ width: "15px", marginLeft: "30%" }} onClick={() => { document.getElementById('fileInput').click(); }} />
                     </div>
                   </div>
-                  <textarea className='px-4' type="text" style={{ width: '100%', height: '78%', border: '0', maxHeight:"100%",padding:"0",outline: "none",backgroundColor: "#2c2c2c",resize:"none",colorScheme:"dark"}} value={input} onChange={handleInputChange}/>
+                  <textarea className='px-4' type="text" style={{ width: '100%', height: '78%', border: '0', maxHeight: "100%", padding: "0", outline: "none", backgroundColor: "#2c2c2c", resize: "none", colorScheme: "dark" }} value={input} onChange={handleInputChange} />
                 </div>
 
-                <div className="row" style={{ height: '47%',border:'solid white 1px',borderRadius: "20px" }}>
-                  <div style={{color:"white",backgroundColor:"#3d3d3d",borderRadius: "20px 20px 0px 0px",display:"flex",justifyContent:"space-between"}}>
-                    <h6 style={{paddingTop: "3%",paddingLeft:"2%", margin: "0"}}>Output</h6>
-                    <div style={{paddingTop:"2%",width:"60px"}}>
-                      <img className='ico' src={copy} style={{width: "12px"}} onClick={() => {navigator.clipboard.writeText(ans)}}/>
-                      <img className='ico' src={download} style={{width: "15px",marginLeft: "30%"}} onClick={handleOutputDownload}/>
+                <div className="row" style={{ height: '47%', border: 'solid white 1px', borderRadius: "20px" }}>
+                  <div style={{ color: "white", backgroundColor: "#3d3d3d", borderRadius: "20px 20px 0px 0px", display: "flex", justifyContent: "space-between" }}>
+                    <h6 style={{ paddingTop: "3%", paddingLeft: "2%", margin: "0" }}>Output</h6>
+                    <div style={{ paddingTop: "2%", width: "60px" }}>
+                      <img className='ico' src={copy} style={{ width: "12px" }} onClick={() => { navigator.clipboard.writeText(ans) }} />
+                      <img className='ico' src={download} style={{ width: "15px", marginLeft: "30%" }} onClick={handleOutputDownload} />
                     </div>
                   </div>
-                  {outputloading ? <div style={{display: "flex", justifyContent:"center",alignItems:"center",width: '100%', height: '78%'}}><img src={spinner} width="20%" height="40%"/></div> : <textarea className='px-4' type="text" value={ans} readOnly style={{ width: '100%', height: '78%', border: '0', maxHeight:"100%",padding:"0",outline: "none",backgroundColor: "#2c2c2c",resize:"none",colorScheme:"dark"}} />}
+                  {outputloading ? <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: '100%', height: '78%' }}><img src={spinner} width="20%" height="40%" /></div> : <textarea className='px-4' type="text" value={ans} readOnly style={{ width: '100%', height: '78%', border: '0', maxHeight: "100%", padding: "0", outline: "none", backgroundColor: "#2c2c2c", resize: "none", colorScheme: "dark" }} />}
                 </div>
               </div>
             </div>
-        </div>
-        <input type="file" id="fileInput" style={{ display: 'none' }} accept=".txt" onChange={handleInputUpload} />
-        <input type="file" id="codeInput" style={{ display: 'none' }} accept={language === "python" ? ".py" : (language === "javascript" ? ".js" : "." + language)} onChange={handleCodeUpload} />
-      </div>}
+          </div>
+          <input type="file" id="fileInput" style={{ display: 'none' }} accept=".txt" onChange={handleInputUpload} />
+          <input type="file" id="codeInput" style={{ display: 'none' }} accept={language === "python" ? ".py" : (language === "javascript" ? ".js" : "." + language)} onChange={handleCodeUpload} />
+        </div>}
     </div>
   );
 }
