@@ -188,6 +188,37 @@ export default function Code() {
     }
   }
 
+  const pollJobStatus = async (jobId) => {
+    try {
+      const response = await fetch(process.env.REACT_APP_BACKEND_URL + "job/" + jobId, {
+        method: "GET",
+        headers: {
+          'Content-Type': 'application/json',
+          'auth-token': localStorage.getItem('token')
+        }
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "Error checking job status");
+      }
+      if (data.state === 'completed') {
+        setAns(data.result ? data.result.ans : "");
+        setOutputLoading(false);
+        setSubmit(true);
+      } else if (data.state === 'failed') {
+        throw new Error(data.failedReason || "Execution failed");
+      } else {
+        // job waiting or active, poll again in 1 second
+        setTimeout(() => pollJobStatus(jobId), 1000);
+      }
+    } catch (error) {
+      console.error("Error polling job status:", error);
+      alert(error.message || "Error executing code, please try again");
+      setOutputLoading(false);
+      setSubmit(true);
+    }
+  };
+
   const handleSubmit = async () => {
     setSubmit(false);
     setOutputLoading(true);
@@ -203,15 +234,19 @@ export default function Code() {
 
       const data = await response.json();
       if (!response.ok) {
-        throw new Error("Error connecting server")
+        throw new Error(data.error || "Error connecting server")
       }
-      setAns(data.ans)
+      if (data.jobId) {
+        pollJobStatus(data.jobId);
+      } else {
+        throw new Error("No job ID received");
+      }
     } catch (error) {
       console.error("Error submitting code:", error);
-      alert("Error connecting server, please try again")
+      alert(error.message || "Error connecting server, please try again");
+      setOutputLoading(false);
+      setSubmit(true);
     }
-    setOutputLoading(false);
-    setSubmit(true);
   };
 
 
