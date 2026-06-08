@@ -12,6 +12,7 @@ import languageinfo from '../data/languageinfo';
 import { state } from './state/State'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { marked } from "marked";
+import { io } from "socket.io-client";
 
 export default function Code() {
   const modalRef = useRef(null);
@@ -43,6 +44,28 @@ export default function Code() {
   useEffect(() => {
     GeneratingRef.current = Generating;
   }, [Generating]);
+
+  const socketRef = useRef(null);
+
+  useEffect(() => {
+    socketRef.current = io(process.env.REACT_APP_BACKEND_URL);
+
+    socketRef.current.on('job_completed', (data) => {
+      setAns(data.result ? data.result.ans : "");
+      setOutputLoading(false);
+      setSubmit(true);
+    });
+
+    socketRef.current.on('job_failed', (data) => {
+      alert(data.failedReason || "Execution failed");
+      setOutputLoading(false);
+      setSubmit(true);
+    });
+
+    return () => {
+      if (socketRef.current) socketRef.current.disconnect();
+    };
+  }, []);
 
   const context = useContext(state);
   const { isLoggedIn, setIsLoggedIn } = context;
@@ -188,37 +211,6 @@ export default function Code() {
     }
   }
 
-  const pollJobStatus = async (jobId) => {
-    try {
-      const response = await fetch(process.env.REACT_APP_BACKEND_URL + "job/" + jobId, {
-        method: "GET",
-        headers: {
-          'Content-Type': 'application/json',
-          'auth-token': localStorage.getItem('token')
-        }
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || "Error checking job status");
-      }
-      if (data.state === 'completed') {
-        setAns(data.result ? data.result.ans : "");
-        setOutputLoading(false);
-        setSubmit(true);
-      } else if (data.state === 'failed') {
-        throw new Error(data.failedReason || "Execution failed");
-      } else {
-        // job waiting or active, poll again in 1 second
-        setTimeout(() => pollJobStatus(jobId), 1000);
-      }
-    } catch (error) {
-      console.error("Error polling job status:", error);
-      alert(error.message || "Error executing code, please try again");
-      setOutputLoading(false);
-      setSubmit(true);
-    }
-  };
-
   const handleSubmit = async () => {
     setSubmit(false);
     setOutputLoading(true);
@@ -237,7 +229,9 @@ export default function Code() {
         throw new Error(data.error || "Error connecting server")
       }
       if (data.jobId) {
-        pollJobStatus(data.jobId);
+        if (socketRef.current) {
+          socketRef.current.emit('subscribe_job', data.jobId);
+        }
       } else {
         throw new Error("No job ID received");
       }
