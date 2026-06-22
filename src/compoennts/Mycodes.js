@@ -118,7 +118,7 @@ export default function Mycodes() {
   return (
     <div>
       {
-        loading ? <div className='spinner' style={{ display: "flex", justifyContent: "center" }}><img src={spinner} /></div> :
+        loading ? <div className='spinner' style={{ display: "flex", justifyContent: "center" }}><img alt='spinner' src={spinner} /></div> :
           <div className='container'>
             <h1 style={{ color: "white", paddingTop: "2%" }}>My Codes</h1>
             {

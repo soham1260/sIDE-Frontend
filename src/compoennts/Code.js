@@ -46,6 +46,8 @@ export default function Code() {
   }, [Generating]);
 
   const socketRef = useRef(null);
+  const cooldownRef = useRef(null);
+  const COOLDOWN_MS = 500;
 
   useEffect(() => {
     socketRef.current = io(process.env.REACT_APP_BACKEND_URL);
@@ -62,7 +64,19 @@ export default function Code() {
       setSubmit(true);
     });
 
+    // shared code room updates
+    socketRef.current.on('code_update', (data) => {
+      // remove any pending local emit to avoid sending back stale code
+      if (cooldownRef.current) {
+        clearTimeout(cooldownRef.current);
+        cooldownRef.current = null;
+      }
+      setCode(data.code);
+      if (data.language) setLanguage(data.language);
+    });
+
     return () => {
+      if (cooldownRef.current) clearTimeout(cooldownRef.current);
       if (socketRef.current) socketRef.current.disconnect();
     };
   }, []);
@@ -98,6 +112,10 @@ export default function Code() {
       else if (location.pathname.startsWith('/sharedcode')) {
         setSharedCode(true);
         await fetchSharedCode(id);
+        // join the shared code room
+        if (socketRef.current && id) {
+          socketRef.current.emit('join_shared', id);
+        }
       }
       else if (location.pathname.startsWith('/history')) {
         setIsHistoryMode(true);
@@ -247,6 +265,18 @@ export default function Code() {
   const handleEditorChange = (value, event) => {
     setCode(value);
     localStorage.setItem(language, value);
+
+    // broadcast to shared code room
+    if (sharedCode && socketRef.current) {
+      // every new keystroke clears timeout set by previous keystroke
+      if (cooldownRef.current) clearTimeout(cooldownRef.current);
+
+      // update sent only after no new keystoke for COOLDOWN_MS ms
+      cooldownRef.current = setTimeout(() => {
+        socketRef.current.emit('code_change', { code: value, language, id });
+        cooldownRef.current = null;
+      }, COOLDOWN_MS);
+    }
   };
 
 
@@ -398,7 +428,7 @@ export default function Code() {
   function handleLanguageChange(language) {
 
     setLanguage(language);
-    if (localStorage.getItem(language) && localStorage.getItem(language).length != 0) {
+    if (localStorage.getItem(language) && localStorage.getItem(language).length !== 0) {
       setCode(localStorage.getItem(language));
     }
     else {
@@ -433,23 +463,6 @@ export default function Code() {
     }
   }
 
-  const syncCode = async () => {
-    try {
-      const response = await fetch(process.env.REACT_APP_BACKEND_URL + "synccode", {
-        method: "POST",
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ language, code, id })
-      });
-
-      if (!response.ok) {
-        navigate("/notfound");
-      }
-    } catch (error) {
-      throw new Error(error.message || "Error connecting to server");
-    }
-  }
 
   const onPromptChange = (e) => {
     setPrompt(e.target.value)
@@ -508,7 +521,7 @@ export default function Code() {
   }
 
   return (
-    <div style={{ paddingTop: "1%" }}>
+    <div style={{ paddingTop: "1%", paddingLeft: "1px" }}>
 
       <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div className="modal-dialog modal-dialog-centered">
@@ -537,9 +550,9 @@ export default function Code() {
               <div dangerouslySetInnerHTML={{ __html: Response }} style={{ marginTop: "15px" }} />
             </div>
             <div className="modal-footer">
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" checked={checked} onChange={() => setChecked(!checked)} style={{ transform: "scale(1.2)", marginRight: "5px" }} />
-                <label class="form-check-label" for="flexCheckDefault">
+              <div className="form-check">
+                <input className="form-check-input" type="checkbox" value="" id="flexCheckDefault" checked={checked} onChange={() => setChecked(!checked)} style={{ transform: "scale(1.2)", marginRight: "5px" }} />
+                <label className="form-check-label" htmlFor="flexCheckDefault">
                   Include code with query
                 </label>
               </div>
@@ -574,16 +587,16 @@ export default function Code() {
             <div className="modal-body">
               <h3 style={{ display: "flex", justifyContent: "center" }}>Share Code</h3>
               <h5>File Name</h5>
-              <input type="text" placeholder='Enter File Name' value={sharedFileName} onChange={(e) => { setSharedFileName(e.target.value) }} style={{ border: "none", border: "1px solid white", backgroundColor: "#2c2c2c", outline: "none", color: "white", width: "100%", padding: "5px", paddingLeft: "10px", fontSize: "large", borderRadius: "5px", marginBottom: "15px" }} />
+              <input type="text" placeholder='Enter File Name' value={sharedFileName} onChange={(e) => { setSharedFileName(e.target.value) }} style={{ border: "1px solid white", backgroundColor: "#2c2c2c", outline: "none", color: "white", width: "100%", padding: "5px", paddingLeft: "10px", fontSize: "large", borderRadius: "5px", marginBottom: "15px" }} />
               {!generateLink ?
                 <button type="button" className="btn btn-outline-primary" style={{ marginBottom: "15px" }} onClick={genLink}>Generate Link</button>
                 :
                 (sharedCodeLink.length === 0 ?
-                  <img src={spinner} width={"80px"} />
+                  <img alt='spinner' src={spinner} width={"80px"} />
                   : <div style={{ display: "flex", flexDirection: "column" }}>
                     <div style={{ display: "flex" }}>
-                      <input type="text" disabled placeholder='Link' value={sharedCodeLink} style={{ border: "none", border: "1px solid white", backgroundColor: "#2c2c2c", outline: "none", color: "white", width: "100%", padding: "5px", paddingLeft: "10px", fontSize: "large", borderRadius: "5px" }} />
-                      <img className="ico" style={{ marginLeft: "15px" }} src={copy} width={"20px"} onClick={() => { navigator.clipboard.writeText(sharedCodeLink) }} />
+                      <input type="text" disabled placeholder='Link' value={sharedCodeLink} style={{ border: "1px solid white", backgroundColor: "#2c2c2c", outline: "none", color: "white", width: "100%", padding: "5px", paddingLeft: "10px", fontSize: "large", borderRadius: "5px" }} />
+                      <img alt='copy' className="ico" style={{ marginLeft: "15px" }} src={copy} width={"20px"} onClick={() => { navigator.clipboard.writeText(sharedCodeLink) }} />
                     </div>
                     <div style={{ paddingTop: "15px" }}>
                       The link is valid only for 24 hours. <br /><p>The link is bound to a copy of this code. Modifying the code accessible by the link won't alter this code.</p>
@@ -594,7 +607,7 @@ export default function Code() {
         </div>
       </div>
 
-      {loading ? <div className='spinner' style={{ display: "flex", justifyContent: "center" }}><img src={spinner} /></div> :
+      {loading ? <div className='spinner' style={{ display: "flex", justifyContent: "center" }}><img alt='spinner' src={spinner} /></div> :
         <div>
           <div className="row">
             <div className='d-flex col-md-8' style={{ justifyContent: "space-between" }}>
@@ -605,18 +618,17 @@ export default function Code() {
                     {language === "cpp" ? "c++" : language}
                   </button>
                   <ul className="dropdown-menu" aria-labelledby="dropdownMenuButtonDark">
-                    <li><a className="dropdown-item" onClick={() => { handleLanguageChange("c") }}>c</a></li>
-                    <li><a className="dropdown-item" onClick={() => { handleLanguageChange("cpp") }}>c++</a></li>
-                    <li><a className="dropdown-item" onClick={() => { handleLanguageChange("java"); }}>Java</a></li>
-                    <li><a className="dropdown-item" onClick={() => { handleLanguageChange("python") }}>Python</a></li>
-                    <li><a className="dropdown-item" onClick={() => { handleLanguageChange("javascript") }}>Javascript</a></li>
+                    <li><button className="dropdown-item" onClick={() => { handleLanguageChange("c") }}>c</button></li>
+                    <li><button className="dropdown-item" onClick={() => { handleLanguageChange("cpp") }}>c++</button></li>
+                    <li><button className="dropdown-item" onClick={() => { handleLanguageChange("java"); }}>Java</button></li>
+                    <li><button className="dropdown-item" onClick={() => { handleLanguageChange("python") }}>Python</button></li>
+                    <li><button className="dropdown-item" onClick={() => { handleLanguageChange("javascript") }}>Javascript</button></li>
                   </ul>
                 </div>
                 <button type="button" className="btn btn-outline-primary btn-sm" style={{ borderRadius: "0" }} data-bs-toggle="modal" data-bs-target="#exampleModal">ⓘ</button>
                 <button type="button" className="btn btn-outline-primary btn-sm" style={{ borderRadius: "0", textWrap: "nowrap" }} data-bs-toggle="modal" data-bs-target="#AIModal">
                   Ask AI
                 </button>
-                {sharedCode && <button type="button" className="btn btn-outline-primary btn-sm" style={{ borderRadius: "0" }} onClick={syncCode}>Sync</button>}
                 {
                   language === 'java' && <input type="text" style={{ border: "1px solid #0D6EFD", backgroundColor: "#2c2c2c", outline: "none", color: "white", width: "80%", fontSize: "large", paddingLeft: "1%" }} value={filename} onChange={(e) => { setFileName(e.target.value) }} />
                 }
@@ -626,16 +638,16 @@ export default function Code() {
               </div>
 
               <div>
-                <img className="ico" style={{ marginRight: "15px", ...(isHistoryMode ? { pointerEvents: "none", opacity: "0.5" } : {}) }} src={reset} width={"20px"} onClick={() => { localStorage.setItem(language, ""); handleLanguageChange(language) }} />
-                <img className="ico" style={{ marginRight: "15px" }} src={copy} width={"20px"} onClick={() => { navigator.clipboard.writeText(code) }} />
-                <img className="ico" style={{ marginRight: "13px", ...(isHistoryMode ? { pointerEvents: "none", opacity: "0.5" } : {}) }} src={share} width={"23px"} data-bs-toggle="modal" data-bs-target="#shareFile" />
-                <img className="ico" style={{ marginRight: "15px" }} src={download} width={"23px"} onClick={handleCodeDownload} />
-                <img className="ico" style={{ marginRight: "40px", ...(isHistoryMode ? { pointerEvents: "none", opacity: "0.5" } : {}) }} src={upload} width={"23px"} onClick={() => { document.getElementById('codeInput').click(); }} />
+                <img alt='reset' className="ico" style={{ marginRight: "15px", ...(isHistoryMode ? { pointerEvents: "none", opacity: "0.5" } : {}) }} src={reset} width={"20px"} onClick={() => { localStorage.setItem(language, ""); handleLanguageChange(language) }} />
+                <img alt='copy' className="ico" style={{ marginRight: "15px" }} src={copy} width={"20px"} onClick={() => { navigator.clipboard.writeText(code) }} />
+                <img alt='share' className="ico" style={{ marginRight: "13px", ...(isHistoryMode ? { pointerEvents: "none", opacity: "0.5" } : {}) }} src={share} width={"23px"} data-bs-toggle="modal" data-bs-target="#shareFile" />
+                <img alt='download' className="ico" style={{ marginRight: "15px" }} src={download} width={"23px"} onClick={handleCodeDownload} />
+                <img alt='upload' className="ico" style={{ marginRight: "40px", ...(isHistoryMode ? { pointerEvents: "none", opacity: "0.5" } : {}) }} src={upload} width={"23px"} onClick={() => { document.getElementById('codeInput').click(); }} />
               </div>
             </div>
             <div className='col-md-4'>
               <input type="text" placeholder='save code' disabled={isHistoryMode} style={{ border: "none", borderBottom: "1px solid white", backgroundColor: "#2c2c2c", outline: "none", color: "white", width: "80%", fontSize: "large" }} value={filename} onChange={(e) => { setFileName(e.target.value) }} />
-              {saving ? <img src={spinner} style={{ marginLeft: "20px", width: "27px" }} /> : <img className="ico" style={{ marginLeft: "20px", ...(isLoggedIn && !isHistoryMode ? {} : { opacity: "0.6", pointerEvents: "none" }) }} src={cloud} width={"28px"} onClick={handleCloudSave} />}
+              {saving ? <img alt='spinner' src={spinner} style={{ marginLeft: "20px", width: "27px" }} /> : <img alt='cloud' className="ico" style={{ marginLeft: "20px", ...(isLoggedIn && !isHistoryMode ? {} : { opacity: "0.6", pointerEvents: "none" }) }} src={cloud} width={"28px"} onClick={handleCloudSave} />}
             </div>
           </div>
           <div className="row" style={{ height: "80vh" }}>
@@ -667,8 +679,8 @@ export default function Code() {
                   <div style={{ color: "white", backgroundColor: "#3d3d3d", borderRadius: "20px 20px 0px 0px", display: "flex", justifyContent: "space-between" }}>
                     <h6 style={{ paddingTop: "3%", paddingLeft: "2%", margin: "0" }}>Input</h6>
                     <div style={{ paddingTop: "2%", width: "60px" }}>
-                      <img className='ico' src={copy} style={{ width: "12px" }} onClick={() => { navigator.clipboard.writeText(input) }} />
-                      <img className='ico' src={upload} style={{ width: "15px", marginLeft: "30%", ...(isHistoryMode ? { pointerEvents: "none", opacity: "0.5" } : {}) }} onClick={() => { document.getElementById('fileInput').click(); }} />
+                      <img alt='copy' className='ico' src={copy} style={{ width: "12px" }} onClick={() => { navigator.clipboard.writeText(input) }} />
+                      <img alt='upload' className='ico' src={upload} style={{ width: "15px", marginLeft: "30%", ...(isHistoryMode ? { pointerEvents: "none", opacity: "0.5" } : {}) }} onClick={() => { document.getElementById('fileInput').click(); }} />
                     </div>
                   </div>
                   <textarea className='px-4' type="text" readOnly={isHistoryMode} style={{ width: '100%', height: '78%', border: '0', maxHeight: "100%", padding: "0", outline: "none", backgroundColor: "#2c2c2c", resize: "none", colorScheme: "dark" }} value={input} onChange={handleInputChange} />
@@ -678,11 +690,11 @@ export default function Code() {
                   <div style={{ color: "white", backgroundColor: "#3d3d3d", borderRadius: "20px 20px 0px 0px", display: "flex", justifyContent: "space-between" }}>
                     <h6 style={{ paddingTop: "3%", paddingLeft: "2%", margin: "0" }}>Output</h6>
                     <div style={{ paddingTop: "2%", width: "60px" }}>
-                      <img className='ico' src={copy} style={{ width: "12px" }} onClick={() => { navigator.clipboard.writeText(ans) }} />
-                      <img className='ico' src={download} style={{ width: "15px", marginLeft: "30%" }} onClick={handleOutputDownload} />
+                      <img alt='copy' className='ico' src={copy} style={{ width: "12px" }} onClick={() => { navigator.clipboard.writeText(ans) }} />
+                      <img alt='download' className='ico' src={download} style={{ width: "15px", marginLeft: "30%" }} onClick={handleOutputDownload} />
                     </div>
                   </div>
-                  {outputloading ? <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: '100%', height: '78%' }}><img src={spinner} width="20%" height="40%" /></div> : <textarea className='px-4' type="text" value={ans} readOnly style={{ width: '100%', height: '78%', border: '0', maxHeight: "100%", padding: "0", outline: "none", backgroundColor: "#2c2c2c", resize: "none", colorScheme: "dark" }} />}
+                  {outputloading ? <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: '100%', height: '78%' }}><img alt='spinner' src={spinner} width="20%" height="40%" /></div> : <textarea className='px-4' type="text" value={ans} readOnly style={{ width: '100%', height: '78%', border: '0', maxHeight: "100%", padding: "0", outline: "none", backgroundColor: "#2c2c2c", resize: "none", colorScheme: "dark" }} />}
                 </div>
               </div>
             </div>
