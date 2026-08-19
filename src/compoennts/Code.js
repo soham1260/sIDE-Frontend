@@ -75,6 +75,12 @@ export default function Code() {
       if (data.language) setLanguage(data.language);
     });
 
+    socketRef.current.on('submit_code_error', (data) => {
+      alert(data.error || "Error connecting server, please try again");
+      setOutputLoading(false);
+      setSubmit(true);
+    });
+
     return () => {
       if (cooldownRef.current) clearTimeout(cooldownRef.current);
       if (socketRef.current) socketRef.current.disconnect();
@@ -232,33 +238,8 @@ export default function Code() {
   const handleSubmit = async () => {
     setSubmit(false);
     setOutputLoading(true);
-    try {
-      const response = await fetch(process.env.REACT_APP_BACKEND_URL + "submitcode", {
-        method: "POST",
-        headers: {
-          'Content-Type': 'application/json',
-          'auth-token': localStorage.getItem('token')
-        },
-        body: JSON.stringify({ code, input, language, filename })
-      });
 
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || "Error connecting server")
-      }
-      if (data.jobId) {
-        if (socketRef.current) {
-          socketRef.current.emit('subscribe_job', data.jobId);
-        }
-      } else {
-        throw new Error("No job ID received");
-      }
-    } catch (error) {
-      console.error("Error submitting code:", error);
-      alert(error.message || "Error connecting server, please try again");
-      setOutputLoading(false);
-      setSubmit(true);
-    }
+    socketRef.current.emit("submit_code", { code, input, language, filename, token: localStorage.getItem('token') })
   };
 
 
